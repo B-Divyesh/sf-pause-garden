@@ -276,7 +276,7 @@ function gamePage(demo: boolean): string {
         </aside>
       </div>
       <dialog id="pause-dialog" aria-labelledby="pause-title"><h2 id="pause-title">Game paused</h2><p>Your room is saved in this browser. Return whenever you are ready.</p><div class="dialog-actions"><button type="button" id="resume-game">Resume game</button><a class="button secondary" href="/" data-link>Leave garden</a></div></dialog>
-      <dialog id="end-dialog" class="end-panel ${game.status === 'lost' ? 'lost' : ''}" aria-labelledby="end-title"><h2 id="end-title">${game.status === 'won' ? 'Garden restored' : 'Chapter complete'}</h2><p>${game.status === 'won' ? `You earned ${game.score} bloom points and met the visitor request.` : `You earned ${game.score} of ${game.target} bloom points. Try a different action order.`}</p><p class="muted">Room ${escapeHtml(game.code)} · ${game.turn} turns · ${game.players.length} players</p><div class="dialog-actions"><button type="button" id="play-again">Play this seed again</button><a class="button secondary" href="/play" data-link>Start a new room</a></div></dialog>
+      <dialog id="end-dialog" class="end-panel ${game.status === 'lost' ? 'lost' : ''}" aria-labelledby="end-title"><h2 id="end-title">${game.status === 'won' ? 'Garden restored' : 'Chapter complete'}</h2><p>${game.status === 'won' ? `You earned ${game.score} bloom points and met the visitor request.` : `You earned ${game.score} of ${game.target} bloom points. Try a different action order.`}</p><p class="muted">Room ${escapeHtml(game.code)} · ${game.turn} turns · ${game.players.length} players</p><div class="dialog-actions"><button type="button" id="play-again">Play this seed again</button><button type="button" class="secondary" id="new-room">Start a new room</button></div></dialog>
     </main>${footer()}`;
 }
 
@@ -392,6 +392,15 @@ function bindGame(): void {
     game = createGame(names, game.seed);
     selectedTool = 'plant';
     saveGame();
+    render(false);
+  });
+  document.querySelector('#new-room')?.addEventListener('click', () => {
+    if (isDemo()) {
+      navigate('/play');
+      return;
+    }
+    localStorage.removeItem(STORAGE_KEY);
+    game = null;
     render(false);
   });
   document.querySelector('#reset-demo')?.addEventListener('click', () => {

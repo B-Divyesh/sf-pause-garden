@@ -32,10 +32,10 @@ npm run build
 
 Results on September 1, 2026:
 
-- `npm test`: 3 deterministic unit tests and 17 browser tests passed.
+- `npm test`: 3 deterministic unit tests and 18 browser tests passed.
 - Claim coverage: all 14 entries in `.factory/claims.json` have tagged tests.
 - `npm run build`: passed; output is `dist/` with `dist/index.html` at root.
-- Initial JavaScript: 26.81 KB raw / 9.59 KB gzip.
+- Initial JavaScript: 26.96 KB raw / 9.63 KB gzip.
 - Initial CSS: 12.67 KB raw / 3.85 KB gzip.
 - Hero images: 30 KB mobile and 64 KB desktop WebP.
 - Lighthouse 13 mobile: Performance 100, Accessibility 100, Best Practices

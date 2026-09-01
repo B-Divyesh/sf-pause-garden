@@ -15,6 +15,24 @@ test('@claim:restart-reset replay starts a fresh chapter', async ({ page }) => {
   await expect(page.getByText('0 / 15', { exact: true }).first()).toBeVisible();
 });
 
+test('a finished real room can return to new-room setup', async ({ page }) => {
+  await page.addInitScript(() => {
+    const state = {
+      version: 1, code: 'DONE', seed: 'DONE-1', rng: 1, turn: 8, maxTurns: 12,
+      score: 14, target: 14, caredCount: 3, visitorTarget: 3, status: 'won',
+      players: [{ id: 0, name: 'Mara', away: false, queuedTool: 'plant' }, { id: 1, name: 'Jules', away: false, queuedTool: 'plant' }],
+      beds: Array.from({ length: 16 }, () => ({ stage: 'empty', family: 'fern', cared: false })),
+      history: ['The garden is restored.'], startedAt: 1,
+    };
+    localStorage.setItem('pause-garden:room', JSON.stringify(state));
+    localStorage.setItem('pause-garden:license-verdict', JSON.stringify({ valid: true, checked: Date.now() }));
+    localStorage.setItem('sb_license:pause-garden', 'test-license');
+  });
+  await page.goto('/play');
+  await page.getByRole('button', { name: 'Start a new room' }).click();
+  await expect(page.getByRole('button', { name: 'Create room' })).toBeVisible();
+});
+
 test('@claim:sleeping-handoff a group can place the current sleeping player token', async ({ page }) => {
   await page.goto('/demo');
   await page.locator('.player.current').getByRole('button', { name: 'Mark sleeping' }).click();
