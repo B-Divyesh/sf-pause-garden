@@ -68,6 +68,7 @@ export function createRoomServer(databasePath = dbPath) {
   store.deleteOlderThan(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const clients = new Set<Client>();
   const http = createServer((request, response) => {
+    if (request.url === '/') return sendHttp(response, 200, { service: 'pause-garden-realtime', ok: true });
     if (request.url === '/health') return sendHttp(response, 200, { ok: true, build: buildSha, storage: 'sqlite' });
     if (!takeRateToken(request)) return sendHttp(response, 429, { error: 'rate_limited' });
     if (request.url === '/api/status') return sendHttp(response, 200, { ok: true });

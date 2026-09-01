@@ -15,8 +15,9 @@ export class RoomStore {
     mkdirSync(dirname(path), { recursive: true });
     this.db = new DatabaseSync(path);
     this.db.exec(`
-      PRAGMA journal_mode = WAL;
+      PRAGMA journal_mode = DELETE;
       PRAGMA synchronous = FULL;
+      PRAGMA busy_timeout = 5000;
       CREATE TABLE IF NOT EXISTS rooms (
         code TEXT PRIMARY KEY,
         state TEXT NOT NULL,
