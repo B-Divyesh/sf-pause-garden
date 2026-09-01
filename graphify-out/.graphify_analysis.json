@@ -1,0 +1,256 @@
+{
+  "communities": {
+    "0": [
+      "src_game_createdemogame",
+      "src_game_setqueuedtool",
+      "src_game_toggleaway",
+      "src_main",
+      "src_main_announce",
+      "src_main_bindcommon",
+      "src_main_bindgame",
+      "src_main_bindsetup",
+      "src_main_isdemo",
+      "src_main_license",
+      "src_main_loadgame",
+      "src_main_navigate",
+      "src_main_pagetitle",
+      "src_main_playchime",
+      "src_main_randomseed",
+      "src_main_render",
+      "src_main_route",
+      "src_main_savegame",
+      "src_main_startmotes",
+      "src_main_takelicensefromurl",
+      "src_main_updatemetadata",
+      "src_main_verifylicense"
+    ],
+    "1": [
+      "ref_dom",
+      "ref_dom_iterable",
+      "ref_es2022",
+      "ref_vite_client",
+      "tsconfig_compileroptions",
+      "tsconfig_compileroptions_allowimportingtsextensions",
+      "tsconfig_compileroptions_isolatedmodules",
+      "tsconfig_compileroptions_lib",
+      "tsconfig_compileroptions_module",
+      "tsconfig_compileroptions_moduledetection",
+      "tsconfig_compileroptions_moduleresolution",
+      "tsconfig_compileroptions_noemit",
+      "tsconfig_compileroptions_skiplibcheck",
+      "tsconfig_compileroptions_strict",
+      "tsconfig_compileroptions_target",
+      "tsconfig_compileroptions_types",
+      "tsconfig_compileroptions_usedefineforclassfields"
+    ],
+    "2": [
+      "src_game",
+      "src_game_applyaction",
+      "src_game_bed",
+      "src_game_creategame",
+      "src_game_currentplayer",
+      "src_game_gamestate",
+      "src_game_hashseed",
+      "src_game_nextrng",
+      "src_game_player",
+      "src_game_stage",
+      "src_game_test",
+      "src_game_tool",
+      "src_game_tools",
+      "src_game_validaction",
+      "src_game_weather",
+      "src_game_weatherfor"
+    ],
+    "3": [
+      "src_main_demobar",
+      "src_main_escapehtml",
+      "src_main_footer",
+      "src_main_gamepage",
+      "src_main_header",
+      "src_main_landing",
+      "src_main_legalpage",
+      "src_main_licensebox",
+      "src_main_notfound",
+      "src_main_plantmark",
+      "src_main_previewboard",
+      "src_main_setuppage"
+    ],
+    "4": [
+      "axe_core",
+      "package_devdependencies",
+      "package_devdependencies_axe_core",
+      "package_devdependencies_playwright_test",
+      "package_devdependencies_typescript",
+      "package_devdependencies_vite",
+      "package_devdependencies_vitest",
+      "playwright_test",
+      "typescript",
+      "vite",
+      "vitest"
+    ],
+    "5": [
+      "package",
+      "package_name",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_dev",
+      "package_scripts_preview",
+      "package_scripts_test",
+      "package_scripts_test_unit",
+      "package_type",
+      "package_version"
+    ],
+    "6": [
+      "ref_playwright_config_ts",
+      "ref_src",
+      "ref_tests",
+      "ref_vite_config_ts",
+      "tsconfig",
+      "tsconfig_include"
+    ],
+    "7": [
+      "public_sw",
+      "public_sw_core"
+    ],
+    "8": [
+      "playwright_config"
+    ],
+    "9": [
+      "tests_e2e_claims_spec"
+    ],
+    "10": [
+      "tests_e2e_quality_spec"
+    ],
+    "11": [
+      "vite_config"
+    ]
+  },
+  "cohesion": {
+    "0": 0.2077922077922078,
+    "1": 0.11764705882352941,
+    "2": 0.20833333333333334,
+    "3": 0.2727272727272727,
+    "4": 0.18181818181818182,
+    "5": 0.18181818181818182,
+    "6": 0.3333333333333333,
+    "7": 1.0,
+    "8": 1.0,
+    "9": 1.0,
+    "10": 1.0,
+    "11": 1.0
+  },
+  "gods": [
+    {
+      "id": "src_main_render",
+      "label": "render()",
+      "degree": 17
+    },
+    {
+      "id": "src_main_bindgame",
+      "label": "bindGame()",
+      "degree": 14
+    },
+    {
+      "id": "tsconfig_compileroptions",
+      "label": "compilerOptions",
+      "degree": 13
+    },
+    {
+      "id": "src_main_gamepage",
+      "label": "gamePage()",
+      "degree": 11
+    },
+    {
+      "id": "src_game_creategame",
+      "label": "createGame()",
+      "degree": 8
+    },
+    {
+      "id": "src_game_applyaction",
+      "label": "applyAction()",
+      "degree": 7
+    },
+    {
+      "id": "src_main_setuppage",
+      "label": "setupPage()",
+      "degree": 7
+    },
+    {
+      "id": "package_scripts",
+      "label": "scripts",
+      "degree": 6
+    },
+    {
+      "id": "src_game_weatherfor",
+      "label": "weatherFor()",
+      "degree": 6
+    },
+    {
+      "id": "src_main_header",
+      "label": "header()",
+      "degree": 6
+    }
+  ],
+  "surprises": [
+    {
+      "source": "gamePage()",
+      "target": "weatherFor()",
+      "source_files": [
+        "src/main.ts",
+        "src/game.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "bridges separate communities"
+    },
+    {
+      "source": "bindGame()",
+      "target": "createGame()",
+      "source_files": [
+        "src/main.ts",
+        "src/game.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "bridges separate communities"
+    },
+    {
+      "source": "bindSetup()",
+      "target": "createGame()",
+      "source_files": [
+        "src/main.ts",
+        "src/game.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "bridges separate communities"
+    },
+    {
+      "source": "bindGame()",
+      "target": "currentPlayer()",
+      "source_files": [
+        "src/main.ts",
+        "src/game.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "bridges separate communities"
+    },
+    {
+      "source": "gamePage()",
+      "target": "currentPlayer()",
+      "source_files": [
+        "src/main.ts",
+        "src/game.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "bridges separate communities"
+    }
+  ],
+  "tokens": {
+    "input": 0,
+    "output": 0
+  }
+}
