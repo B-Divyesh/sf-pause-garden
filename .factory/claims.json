@@ -1,0 +1,79 @@
+[
+  {
+    "id": "chapter-complete",
+    "claim": "A sample chapter reaches a clear end summary.",
+    "where": "demo and README",
+    "test": "npm test -- --grep @claim:chapter-complete",
+    "sandbox": "fresh browser context at /demo; play the valid tend token; assert the garden-restored summary and score"
+  },
+  {
+    "id": "restart-reset",
+    "claim": "A finished chapter can restart from turn one.",
+    "where": "end summary and README",
+    "test": "npm test -- --grep @claim:restart-reset",
+    "sandbox": "finish the sample chapter; replay the seed; assert turn one and zero points"
+  },
+  {
+    "id": "sleeping-handoff",
+    "claim": "Any present player can place a sleeping player's queued token.",
+    "where": "landing, game, and README",
+    "test": "npm test -- --grep @claim:sleeping-handoff",
+    "sandbox": "sample room; mark the current player sleeping; place their valid queued token; assert the group action log"
+  },
+  {
+    "id": "local-recovery",
+    "claim": "The room restores after a refresh.",
+    "where": "landing, game, privacy, and README",
+    "test": "npm test -- --grep @claim:local-recovery",
+    "sandbox": "fresh browser context; create a real room; play one turn; reload; assert turn two and room code"
+  },
+  {
+    "id": "settings-persist",
+    "claim": "The sound setting persists.",
+    "where": "game and README",
+    "test": "npm test -- --grep @claim:settings-persist",
+    "sandbox": "sample room; switch sound off; reload; assert it remains off"
+  },
+  {
+    "id": "offline-reload",
+    "claim": "The visited demo reloads offline.",
+    "where": "README",
+    "test": "npm test -- --grep @claim:offline-reload",
+    "sandbox": "own fresh browser context; visit /demo; await service worker; set offline; reload; assert game and offline state"
+  },
+  {
+    "id": "privacy-same-origin",
+    "claim": "Demo play sends no player data away from the site.",
+    "where": "footer, privacy, and README",
+    "test": "npm test -- --grep @claim:privacy-same-origin",
+    "sandbox": "fresh demo; record every request through chapter completion; assert every request is same-origin"
+  },
+  {
+    "id": "keyboard-controls",
+    "claim": "The game supports keyboard-only play.",
+    "where": "landing, setup, and README",
+    "test": "npm test -- --grep @claim:keyboard-controls",
+    "sandbox": "fresh demo; move across the grid using ArrowRight and place the winning token with Enter"
+  },
+  {
+    "id": "two-to-four-players",
+    "claim": "A room supports two to four players.",
+    "where": "landing, setup, footer, and README",
+    "test": "npm test -- --grep @claim:two-to-four-players",
+    "sandbox": "fresh real setup; add two players; create the room; assert four player rows"
+  },
+  {
+    "id": "paid-host-edition",
+    "claim": "A valid Host Edition license enables custom seeds and unlimited chapter setup.",
+    "where": "pricing, setup, terms, and README",
+    "test": "npm test -- --grep @claim:paid-host-edition",
+    "sandbox": "fresh context with a current cached valid verdict; open setup; assert Host Edition and editable seed"
+  },
+  {
+    "id": "seed-determinism",
+    "claim": "The same seed creates the same beds and weather.",
+    "where": "setup and README",
+    "test": "npm run test:unit -- -t @claim:seed-determinism",
+    "sandbox": "construct two games with the same seed and compare their beds and first weather"
+  }
+]

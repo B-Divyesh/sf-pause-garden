@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pause-garden.sociobot.in/sitemap.xml
