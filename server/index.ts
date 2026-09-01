@@ -8,7 +8,7 @@ import { RoomStore, type StoredRoom } from './store.js';
 
 const PORT = Number(process.env.PORT || 8787);
 const dataDir = process.env.DATA_DIR || (existsSync('/data') ? '/data' : resolve('data'));
-const dbPath = process.env.DATABASE_PATH || join(dataDir, 'pause-garden.sqlite');
+const dbPath = process.env.DATABASE_PATH || join(dataDir, 'pause-garden-v2.sqlite');
 const buildSha = process.env.BUILD_SHA || 'dev';
 const allowedOrigins = new Set(['https://pause-garden.sociobot.in', 'http://127.0.0.1:4173', 'http://localhost:4173']);
 const codeAlphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
