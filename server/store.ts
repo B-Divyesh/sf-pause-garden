@@ -1,5 +1,5 @@
 import { DatabaseSync } from 'node:sqlite';
-import { copyFileSync, existsSync, mkdirSync, renameSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { GameState } from '../src/game.js';
 
@@ -18,7 +18,7 @@ export class RoomStore {
     this.durablePath = workingPath ? path : null;
     this.workingPath = workingPath || path;
     mkdirSync(dirname(this.workingPath), { recursive: true });
-    if (this.durablePath && existsSync(this.durablePath)) copyFileSync(this.durablePath, this.workingPath);
+    if (this.durablePath && existsSync(this.durablePath)) writeFileSync(this.workingPath, readFileSync(this.durablePath));
     this.db = new DatabaseSync(this.workingPath);
     this.db.exec(`
       PRAGMA journal_mode = DELETE;
@@ -45,7 +45,7 @@ export class RoomStore {
   private persist(): void {
     if (!this.durablePath) return;
     const next = `${this.durablePath}.next`;
-    copyFileSync(this.workingPath, next);
+    writeFileSync(next, readFileSync(this.workingPath));
     renameSync(next, this.durablePath);
   }
 
