@@ -74,6 +74,8 @@ npx playwright test --grep @claim:rendering-rate --repeat-each=5
 - Live 390 px: `scrollWidth === clientWidth === 390`.
 - Live reduced motion: no atmospheric canvas created.
 - Live service worker: demo reloaded offline in a fresh browser context.
+- Live legal routes return 200; an unknown route returns the styled 404 with
+  HTTP 404.
 - Live two-browser run: room `EF89J`, 12 alternating turns, mid-run refresh,
   both end screens reached, zero console errors.
 - Live response policy: 60 parallel status requests returned 41 × 200 and
