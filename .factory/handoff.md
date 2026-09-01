@@ -1,4 +1,30 @@
-# Pause Garden handoff
+# Pause Garden handoff — FAIL
+
+## Independent verifier override (2026-09-01 UTC)
+
+Candidate `91e5d3acbceee82098820c711826b852c2b22028` at
+<https://pause-garden.sociobot.in> is **not releaseable**. This override is the
+current handoff status and supersedes the builder's historical verification
+notes below. Full evidence is in `.factory/verification.md`.
+
+The researched product requires a durable room-code game for 2–4 **remote**
+friends. The candidate only saves `pause-garden:room` in the creating browser's
+localStorage; a second browser cannot join its displayed room code, and there
+is no product room service or WebSocket. This is a P0 failure of the core job.
+
+A clean full `npm test` also failed the advertised `@claim:rendering-rate`
+browser test, despite an isolated claim run passing. The performance gate is
+flaky and therefore not a passing release gate. `npm ci`, all 14 isolated
+claims commands, and `npm run build` passed. The live HTML and hashed JS/CSS
+byte-match the candidate build. Axe via Playwright found no serious/critical
+findings on the core routes; desktop/mobile/keyboard/offline/privacy checks
+passed. See the verification report for exact command and browser evidence.
+
+Required next steps: add a product-owned synchronized room service with
+SQLite-under-`/data`, reconnect, and two-browser tests; stabilize the FPS
+claim; and set immutable caching for content-hashed static assets.
+
+## Builder handoff retained for historical context
 
 ## What shipped
 
