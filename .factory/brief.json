@@ -1,0 +1,9 @@
+{
+  "slug": "pause-garden",
+  "title": "Pause Garden",
+  "artifact_class": "browser-game",
+  "summary": "Restore a garden with 2–4 friends, even when someone steps away.",
+  "session": "15-minute turn-based chapters",
+  "monetization": "one-time host unlock",
+  "state": "BUILDING"
+}
