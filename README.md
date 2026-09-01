@@ -2,13 +2,9 @@
 
 Restore a garden with 2–4 friends, even when someone steps away.
 
-Pause Garden is a 12-turn, shared-screen browser game for interrupted
-evenings. Players take one turn at a time. Weather changes each action. If a
-player leaves, the group can place that player’s queued token and continue.
-
-The current static release supports one shared browser. It does not yet sync a
-room across remote devices. This limit is visible in the product and tracked in
-the handoff.
+Pause Garden is a 12-turn online browser game for 2–4 remote friends. Players
+join a private room by code and take one turn at a time. Weather changes each
+action. If a player leaves, the group can place that player’s queued token.
 
 ## Try the sample game
 
@@ -20,15 +16,16 @@ reads or writes a real room. Use **Reset demo** to restore the sample.
 
 ## Play
 
-1. Open **Play** and add two to four names.
-2. Create the room and choose Plant, Water, or Tend.
-3. Select a valid bed. Arrow keys move between beds.
-4. Mark any player sleeping when they leave.
-5. Reach the bloom and visitor goals within 12 turns.
+1. Open **Play**, enter two to four names, and create the online room.
+2. Share the five-character code and each friend’s chosen name.
+3. Each friend joins from their own browser.
+4. Choose Plant, Water, or Tend, then select a valid bed.
+5. Reach both goals within 12 turns.
 
-The game supports pointer, touch, and keyboard-only play. It saves the room and
-sound choice in local storage. The visited demo reloads offline through the
-service worker.
+The game supports pointer, touch, and keyboard-only play. The product-owned
+room service synchronizes turns and stores room state in SQLite. An opaque
+token reconnects a player after refresh. The visited demo reloads offline and
+never sends sample state to the room service.
 
 ## Host Edition
 
@@ -38,10 +35,12 @@ checkout. The app stores the license locally.
 
 ## Develop
 
-Requirements: Node.js 20 or later and npm.
+Requirements: Node.js 22 or later and npm.
 
 ```sh
 npm install
+npm run dev:rooms
+# In another terminal:
 npm run dev
 ```
 
@@ -60,23 +59,25 @@ npm test
 npm run build
 ```
 
-The suite covers deterministic game rules, title-to-end play, replay, sleeping
-handoff, local recovery, sound persistence, keyboard control, 390 px layout,
-offline reload, privacy requests, license state, and accessibility. The scene
-animation reaches at least 55 frames per second in the Chromium test browser.
+The suite covers deterministic game rules, two-browser join/play/end sync,
+SQLite recovery, browser reconnect, replay, sleeping handoff, sound persistence,
+keyboard control, 390 px layout, offline demo reload, privacy requests, rate
+limits, license state, and accessibility. The animation test measures at least
+55 fps from median frame pacing over 90 frames.
 
 ## Privacy
 
-Player names and garden state remain in browser storage. Demo play sends no
-player data away from the site. License verification sends only the saved
+Online room names and garden state go only to the product-owned Pause Garden
+room service. Rooms expire after 30 inactive days. Demo play sends no player
+data away from the static site. License verification sends only the saved
 license token to `api.sociobot.in`. See `/privacy` and `/terms`.
 
 ## Deploy
 
-Deploy the contents of `dist/` as a static site. The included Azure Static Web
-Apps configuration provides SPA fallback, a custom 404, caching, CSP, and
-security headers. Infrastructure and billing registration remain factory
-tasks.
+Deploy `dist/` to the existing static site. Deploy the Docker image as
+`sf-pause-garden-realtime` with WebSocket ingress and one replica. Mount the
+fleet-created data share at `/data`. The static configuration supplies SPA
+fallback, immutable hashed assets, CSP, and security headers.
 
 ## License
 

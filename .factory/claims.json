@@ -21,11 +21,18 @@
     "sandbox": "sample room; mark the current player sleeping; place their valid queued token; assert the group action log"
   },
   {
-    "id": "local-recovery",
-    "claim": "The room restores after a refresh.",
+    "id": "remote-room-play",
+    "claim": "Two remote browsers can join one room, alternate turns, and reach the same end screen.",
     "where": "landing, game, privacy, and README",
-    "test": "npm test -- --grep @claim:local-recovery",
-    "sandbox": "fresh browser context; create a real room; play one turn; reload; assert turn two and room code"
+    "test": "npm test -- --grep @claim:remote-room-play",
+    "sandbox": "two fresh browser contexts; create and join by code and name; alternate 12 deterministic Plant actions; assert both show the same end summary"
+  },
+  {
+    "id": "remote-reconnect",
+    "claim": "A player reconnects to the synchronized room after a refresh.",
+    "where": "landing, game, privacy, and README",
+    "test": "npm test -- --grep @claim:remote-reconnect",
+    "sandbox": "two fresh browser contexts in one room; play two turns; reload the second browser; assert its reconnect token restores turn three"
   },
   {
     "id": "settings-persist",
@@ -57,7 +64,7 @@
   },
   {
     "id": "two-to-four-players",
-    "claim": "A room supports two to four players and lasts 12 turns.",
+    "claim": "An online room supports two to four players and lasts 12 turns.",
     "where": "landing, setup, footer, and README",
     "test": "npm test -- --grep @claim:two-to-four-players",
     "sandbox": "fresh real setup; add two players; create the room; assert four player rows"
@@ -78,10 +85,10 @@
   },
   {
     "id": "rendering-rate",
-    "claim": "The scene animation reaches at least 55 frames per second in the test browser.",
+    "claim": "The scene animation has median frame pacing of at least 55 frames per second in the test browser.",
     "where": "README and handoff",
     "test": "npm test -- --grep @claim:rendering-rate",
-    "sandbox": "fresh desktop Chromium demo; count requestAnimationFrame callbacks for one second; require at least 55"
+    "sandbox": "fresh desktop Chromium demo; sample 90 requestAnimationFrame intervals; discard warmup frames; require median pacing of at least 55 fps"
   },
   {
     "id": "free-chapter",

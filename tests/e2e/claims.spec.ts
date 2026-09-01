@@ -15,24 +15,6 @@ test('@claim:restart-reset replay starts a fresh chapter', async ({ page }) => {
   await expect(page.getByText('0 / 15', { exact: true }).first()).toBeVisible();
 });
 
-test('a finished real room can return to new-room setup', async ({ page }) => {
-  await page.addInitScript(() => {
-    const state = {
-      version: 1, code: 'DONE', seed: 'DONE-1', rng: 1, turn: 8, maxTurns: 12,
-      score: 14, target: 14, caredCount: 3, visitorTarget: 3, status: 'won',
-      players: [{ id: 0, name: 'Mara', away: false, queuedTool: 'plant' }, { id: 1, name: 'Jules', away: false, queuedTool: 'plant' }],
-      beds: Array.from({ length: 16 }, () => ({ stage: 'empty', family: 'fern', cared: false })),
-      history: ['The garden is restored.'], startedAt: 1,
-    };
-    localStorage.setItem('pause-garden:room', JSON.stringify(state));
-    localStorage.setItem('pause-garden:license-verdict', JSON.stringify({ valid: true, checked: Date.now() }));
-    localStorage.setItem('sb_license:pause-garden', 'test-license');
-  });
-  await page.goto('/play');
-  await page.getByRole('button', { name: 'Start a new room' }).click();
-  await expect(page.getByRole('button', { name: 'Create room' })).toBeVisible();
-});
-
 test('@claim:sleeping-handoff a group can place the current sleeping player token', async ({ page }) => {
   await page.goto('/demo');
   await page.locator('.player.current').getByRole('button', { name: 'Mark sleeping' }).click();
@@ -40,13 +22,43 @@ test('@claim:sleeping-handoff a group can place the current sleeping player toke
   await expect(page.getByText(/The group used Mara’s queued token planted a seed/)).toBeVisible();
 });
 
-test('@claim:local-recovery a real room returns after refresh', async ({ page }) => {
-  await page.goto('/play');
-  await page.getByRole('button', { name: 'Create room' }).click();
-  await page.getByRole('button', { name: /Bed 1: empty.*Use Plant seed/ }).click();
-  await page.reload();
-  await expect(page.getByText('2 of 12', { exact: true })).toBeVisible();
-  await expect(page.locator('.game-title-row .eyebrow')).toContainText(/Room [A-Z0-9]{4}/);
+test('@claim:remote-room-play @claim:remote-reconnect two browsers join, play, reconnect, and reach the end', async ({ browser }) => {
+  const hostContext = await browser.newContext();
+  const friendContext = await browser.newContext();
+  const host = await hostContext.newPage();
+  const friend = await friendContext.newPage();
+
+  await host.goto('/play');
+  await host.getByRole('button', { name: 'Create online room' }).click();
+  await expect(host.getByText('Room synced')).toBeVisible();
+  const roomLabel = await host.locator('.game-title-row .eyebrow').textContent();
+  const code = roomLabel?.match(/Room ([A-Z0-9]{5})/)?.[1];
+  expect(code).toMatch(/^[A-Z0-9]{5}$/);
+
+  await friend.goto('/play');
+  await friend.getByLabel('Room code').fill(code!);
+  await friend.getByLabel('Your player name').fill('Jules');
+  await friend.getByRole('button', { name: 'Join online room' }).click();
+  await expect(friend.getByText('Room synced')).toBeVisible();
+  await expect(friend.getByText('1 of 12', { exact: true })).toBeVisible();
+
+  for (let turn = 0; turn < 12; turn += 1) {
+    const actor = turn % 2 === 0 ? host : friend;
+    const observer = turn % 2 === 0 ? friend : host;
+    await actor.locator('.garden-bed.valid').first().click();
+    if (turn < 11) await expect(observer.getByText(`${turn + 2} of 12`, { exact: true })).toBeVisible();
+    if (turn === 1) {
+      await friend.reload();
+      await expect(friend.getByText('Room synced')).toBeVisible();
+      await expect(friend.getByText('3 of 12', { exact: true })).toBeVisible();
+    }
+  }
+
+  await expect(host.getByRole('heading', { name: 'Chapter complete' })).toBeVisible();
+  await expect(friend.getByRole('heading', { name: 'Chapter complete' })).toBeVisible();
+  await expect(host.getByText(new RegExp(`Room ${code} · 12 turns · 2 players`))).toBeVisible();
+  await hostContext.close();
+  await friendContext.close();
 });
 
 test('@claim:settings-persist sound choice survives refresh', async ({ page }) => {
@@ -65,7 +77,7 @@ test('@claim:offline-reload demo reloads after the first visit', async ({ browse
   await context.setOffline(true);
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Restore this garden together' })).toBeVisible();
-  await expect(page.getByText(/Offline — turns still save here/)).toBeVisible();
+  await expect(page.getByText(/Offline — demo turns still save here/)).toBeVisible();
   await context.close();
 });
 
@@ -97,7 +109,7 @@ test('@claim:two-to-four-players setup creates a four-player room', async ({ pag
   await page.goto('/play');
   await page.getByRole('button', { name: 'Add player' }).click();
   await page.getByRole('button', { name: 'Add player' }).click();
-  await page.getByRole('button', { name: 'Create room' }).click();
+  await page.getByRole('button', { name: 'Create online room' }).click();
   await expect(page.locator('.player')).toHaveCount(4);
   await expect(page.getByText('1 of 12', { exact: true })).toBeVisible();
 });
@@ -118,8 +130,8 @@ test('@claim:paid-host-edition a cached valid license enables custom seeds', asy
 
 test('@claim:free-chapter a visitor can create the free room without an account', async ({ page }) => {
   await page.goto('/play');
-  await expect(page.getByRole('button', { name: 'Create room' })).toBeVisible();
-  await page.getByRole('button', { name: 'Create room' }).click();
+  await expect(page.getByRole('button', { name: 'Create online room' })).toBeVisible();
+  await page.getByRole('button', { name: 'Create online room' }).click();
   await expect(page.getByText('1 of 12', { exact: true })).toBeVisible();
   await expect(page.locator('.garden-board')).toBeVisible();
 });

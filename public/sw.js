@@ -1,4 +1,4 @@
-const CACHE = 'pause-garden-v2';
+const CACHE = 'pause-garden-v3';
 const CORE = ['/', '/demo', '/art/greenhouse-760.webp', '/art/greenhouse-1200.webp', '/favicon.svg'];
 
 self.addEventListener('install', (event) => {

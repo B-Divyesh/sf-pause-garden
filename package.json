@@ -5,14 +5,22 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "dev:rooms": "tsx server/index.ts",
+    "build": "tsc --noEmit && npm run build:server && vite build",
+    "build:server": "tsc -p server/tsconfig.json",
     "preview": "vite preview",
     "test": "npm run test:unit && playwright test",
-    "test:unit": "vitest run src"
+    "test:unit": "vitest run src/game.test.ts server/room.test.ts"
+  },
+  "dependencies": {
+    "ws": "8.21.3"
   },
   "devDependencies": {
     "@playwright/test": "1.58.2",
+    "@types/node": "22.15.3",
+    "@types/ws": "8.18.1",
     "axe-core": "4.10.2",
+    "tsx": "4.20.6",
     "typescript": "5.9.2",
     "vite": "7.3.6",
     "vitest": "3.2.7"

@@ -1,6 +1,10 @@
 node_modules/
 dist/
+server-dist/
+data/
 test-results/
 playwright-report/
-graphify-out/
-*.log
+.factory/evidence/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal

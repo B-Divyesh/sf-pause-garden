@@ -9,5 +9,7 @@
 - Leave: use **Start for real**; demo state is not copied
 - Namespace: session storage key `demo:pause-garden:room`
 
-The demo does not read or write `pause-garden:room`. Closing the browser
-session discards its state. The sample assets are part of the offline shell.
+The demo does not read or write `pause-garden:room` or
+`pause-garden:room-session`. It never opens a WebSocket or reaches the online
+room service. Closing the browser session discards its state. The sample
+assets are part of the offline shell.

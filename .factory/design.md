@@ -80,12 +80,21 @@ footer.
 
 ## Difficulty curve
 
-A chapter lasts 12 turns. The target starts at 18 bloom points for two players
-and adds two points per extra player. Rain doubles watering, wind clears one
-care mark after an action, and warm weather advances planted beds. The visitor
-request adds a secondary goal. Every seed produces the same weather, garden,
-and visitor request. A run can be lost when the final turn ends below either
-goal; replaying the seed rewards better action ordering.
+A chapter lasts 12 turns. The bloom target is 12 plus the player count: 14 for
+two players, 15 for three, and 16 for four. Rain lets one watering action move
+a seedling straight to bloom. Warm light starts a planted seed at the growing
+stage. Wind adds one bonus point to a tend action. The visitor request requires
+three cared-for beds. Every seed produces the same weather and garden. A run
+ends below either goal after turn 12; replaying rewards better action ordering.
+
+## Remote room architecture
+
+The static client connects only to the product-owned Pause Garden room service.
+The server is authoritative for actions, keeps rooms in SQLite under `/data`,
+and broadcasts each committed revision over WebSockets. A five-character room
+code and a player name join a room. An opaque browser token reconnects that
+player after a refresh. Demo mode never opens a room connection and remains a
+separate session-storage sandbox.
 
 ## Responsive intent
 
@@ -93,4 +102,3 @@ At 390 px, the hero image becomes a shallow stage behind the first screen and
 the copy plate stays opaque. The game board remains a 4 × 4 grid. Secondary
 explanations move below play, but weather, goal, active player, and actions stay
 visible without horizontal scrolling.
-

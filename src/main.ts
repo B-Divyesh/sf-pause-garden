@@ -15,12 +15,18 @@ import {
 
 const root = document.querySelector<HTMLDivElement>('#app')!;
 const STORAGE_KEY = 'pause-garden:room';
+const ROOM_SESSION_KEY = 'pause-garden:room-session';
 const DEMO_KEY = 'demo:pause-garden:room';
 const SOUND_KEY = 'pause-garden:sound';
 const COMPLETE_KEY = 'pause-garden:chapters-complete';
 const LICENSE_KEY = 'sb_license:pause-garden';
 const VERDICT_KEY = 'pause-garden:license-verdict';
 const API_BASE = 'https://api.sociobot.in/api/v1/products/pause-garden';
+const ROOM_ORIGIN = import.meta.env.VITE_ROOM_API || (location.hostname === '127.0.0.1' || location.hostname === 'localhost'
+  ? 'http://127.0.0.1:8787'
+  : 'https://pause-garden-realtime.sociobot.in');
+
+interface RoomSession { code: string; sessionToken: string; playerId: number }
 
 let game: GameState | null = null;
 let selectedTool: Tool = 'plant';
@@ -28,6 +34,12 @@ let soundEnabled = localStorage.getItem(SOUND_KEY) !== 'off';
 let licensed = false;
 let licenseNotice = '';
 let lastFocus: HTMLElement | null = null;
+let roomSocket: WebSocket | null = null;
+let roomRevision = 0;
+let remotePlayerId: number | null = null;
+let connectionState: 'local' | 'connecting' | 'connected' | 'reconnecting' | 'offline' = 'local';
+let roomError = '';
+let reconnectTimer = 0;
 
 function escapeHtml(value: string): string {
   return value.replace(/[&<>'"]/g, (character) => ({
@@ -51,7 +63,15 @@ function saveGame(): void {
   storage.setItem(isDemo() ? DEMO_KEY : STORAGE_KEY, JSON.stringify(game));
 }
 
+function savedRoomSession(): RoomSession | null {
+  try {
+    const session = JSON.parse(localStorage.getItem(ROOM_SESSION_KEY) || 'null') as RoomSession | null;
+    return session?.code && session.sessionToken && Number.isInteger(session.playerId) ? session : null;
+  } catch { return null; }
+}
+
 function loadGame(demo: boolean): GameState | null {
+  if (!demo && !savedRoomSession()) return null;
   const storage = demo ? sessionStorage : localStorage;
   const raw = storage.getItem(demo ? DEMO_KEY : STORAGE_KEY);
   if (!raw) return demo ? createDemoGame() : null;
@@ -79,8 +99,8 @@ function updateMetadata(path: string): void {
   const descriptions: Record<string, string> = {
     '/': 'Play a 12-turn garden chapter with 2–4 friends. A sleeping player never stops the group.',
     '/demo': 'Try a sample Pause Garden chapter on turn seven with no setup.',
-    '/play': 'Create or resume a shared-screen Pause Garden chapter for 2–4 players.',
-    '/privacy': 'Read what Pause Garden stores in your browser and when it checks a license.',
+    '/play': 'Create or join a private Pause Garden room for 2–4 remote friends.',
+    '/privacy': 'Read what Pause Garden stores for private rooms and when it checks a license.',
     '/terms': 'Read the purchase and license terms for Pause Garden.',
     '/404': 'This page does not reach the garden. Return home or open the sample game.',
   };
@@ -109,7 +129,7 @@ function footer(): string {
       <div>
         <strong>Pause Garden</strong>
         <div>Restore a garden with 2–4 friends.</div>
-        <div class="footer-note">Original generated scenery. No player data is sent from the game. Version 1.0.0.</div>
+        <div class="footer-note">Original generated scenery. Room data goes only to Pause Garden. Version 1.1.0.</div>
       </div>
       <div class="footer-links">
         <a href="/privacy" data-link>Privacy</a>
@@ -148,7 +168,7 @@ function landing(): string {
           </div>
           <ul class="facts">
             <li>Keyboard and touch controls</li>
-            <li>Progress stays in this browser</li>
+            <li>Private room code, no account</li>
             <li>One full chapter is free</li>
           </ul>
         </div>
@@ -167,8 +187,8 @@ function landing(): string {
       </section>
       <section class="section plain-section">
         <div class="shell boundaries">
-          <div><p class="eyebrow">What it does</p><h2>One complete chapter</h2><ul><li>Creates a garden from a visible seed.</li><li>Saves the current turn after every action.</li><li>Restores the room after a refresh.</li></ul></div>
-          <div><p class="eyebrow">What it does not do</p><h2>No pressure to stay online</h2><ul><li>No timers, combat, or daily streaks.</li><li>No account, chat, or public player list.</li><li>This static v1 uses one shared screen.</li></ul></div>
+          <div><p class="eyebrow">What it does</p><h2>One shared garden room</h2><ul><li>Creates a private five-character room code.</li><li>Syncs each turn across your friends’ browsers.</li><li>Reconnects the room after a refresh.</li></ul></div>
+          <div><p class="eyebrow">What it does not do</p><h2>No pressure to stay online</h2><ul><li>No timers, combat, or daily streaks.</li><li>No account, chat, or public player list.</li><li>No third-party multiplayer service.</li></ul></div>
         </div>
       </section>
       <section class="section shell" id="price">
@@ -201,9 +221,9 @@ function setupPage(): string {
   const completed = Number(localStorage.getItem(COMPLETE_KEY) || '0');
   const gated = completed > 0 && !licensed;
   return `${header('/play')}<main id="main" class="shell setup-page">
-    <p class="eyebrow">Shared-screen chapter</p>
+    <p class="eyebrow">Private online room</p>
     <h1>${gated ? 'Start another garden chapter' : 'Start a garden chapter together'}</h1>
-    <p class="lede">Add 2–4 players. The room saves in this browser after every turn.</p>
+    <p class="lede">Name 2–4 friends, then share the room code. Each friend joins from their own browser.</p>
     <div class="setup-grid">
       ${gated ? `<section><div class="notice"><strong>Your free chapter is complete.</strong><p>Host Edition adds unlimited chapters and custom seeds.</p></div><p class="price">$6 <small>one-time purchase</small></p><a class="button" href="${API_BASE}/checkout">Buy Host Edition</a></section>` : `<form id="setup-form" class="setup-form">
         <div class="name-fields" id="name-fields">
@@ -212,10 +232,10 @@ function setupPage(): string {
         </div>
         <div class="setup-actions"><button type="button" class="secondary" id="add-player">Add player</button><button type="button" class="quiet" id="remove-player" disabled>Remove player</button></div>
         <div class="field"><label for="seed">Garden seed ${licensed ? '' : '(set by the garden)'}</label><input id="seed" name="seed" value="${randomSeed()}" maxlength="16" ${licensed ? '' : 'readonly'} aria-describedby="seed-help" /><small id="seed-help" class="muted">The same seed always creates the same garden and weather.</small></div>
-        <p class="form-error" id="setup-error" aria-live="polite"></p>
-        <button type="submit">Create room</button>
+        <p class="form-error" id="setup-error" aria-live="polite">${escapeHtml(roomError)}</p>
+        <button type="submit">Create online room</button>
       </form>`}
-      <aside><h2>Before you start</h2><ul class="muted"><li>A chapter has 12 turns.</li><li>Arrow keys move between beds.</li><li>Enter or Space places a token.</li><li>Mark anyone sleeping at any time.</li></ul></aside>
+      <aside class="join-panel"><h2>Join a friend’s room</h2><form id="join-form" class="setup-form"><div class="field"><label for="room-code">Room code</label><input id="room-code" name="code" maxlength="5" autocapitalize="characters" autocomplete="off" required /></div><div class="field"><label for="join-name">Your player name</label><input id="join-name" name="name" maxlength="18" autocomplete="nickname" required /></div><button type="submit">Join online room</button><p class="muted">Use the name your host entered.</p></form></aside>
     </div>
     <section class="section">${licenseBox()}</section>
   </main>${footer()}`;
@@ -239,14 +259,18 @@ function gamePage(demo: boolean): string {
   if (player.away) selectedTool = player.queuedTool;
   const weather = weatherFor(game);
   const weatherClass = weather.toLowerCase().replace(' ', '-');
+  const canTakeTurn = demo || (connectionState === 'connected' && (player.id === remotePlayerId || player.away));
+  const connectionCopy = demo
+    ? (navigator.onLine ? 'Demo stays in this browser' : 'Offline — demo turns still save here')
+    : ({ connected: 'Room synced', connecting: 'Connecting to room…', reconnecting: 'Reconnecting to room…', offline: 'Connection lost — actions are paused', local: 'Opening saved room…' }[connectionState]);
   const awayText = player.away
     ? `<p class="sleep-note"><strong>${escapeHtml(player.name)} is sleeping.</strong> Place their queued ${tools[player.queuedTool].label.toLowerCase()} token for them.</p>`
     : '';
   return `${demo ? demoBar() : ''}${header(demo ? '/demo' : '/play')}
     <main id="main" class="shell game-page">
       <div class="game-title-row">
-        <div><p class="eyebrow">Room ${escapeHtml(game.code)} · Seed ${escapeHtml(game.seed)}</p><h1>Restore this garden together</h1><p class="connection ${navigator.onLine ? '' : 'offline'}">${navigator.onLine ? 'Saved in this browser' : 'Offline — turns still save here'}</p></div>
-        <div class="game-actions-top"><button type="button" class="secondary" id="sound-toggle">Sound ${soundEnabled ? 'on' : 'off'}</button><button type="button" class="secondary" id="pause-game">Pause game</button></div>
+        <div><p class="eyebrow">Room ${escapeHtml(game.code)} · Seed ${escapeHtml(game.seed)}</p><h1>Restore this garden together</h1><p class="connection ${connectionState === 'offline' || !navigator.onLine ? 'offline' : ''}" aria-live="polite">${connectionCopy}</p>${demo ? '' : '<p class="invite-note">Share the room code and each player’s chosen name.</p>'}</div>
+        <div class="game-actions-top">${demo ? '' : '<button type="button" class="secondary" id="copy-room">Copy room code</button>'}<button type="button" class="secondary" id="sound-toggle">Sound ${soundEnabled ? 'on' : 'off'}</button><button type="button" class="secondary" id="pause-game">Pause game</button></div>
       </div>
       <div class="game-layout">
         <section class="garden-stage" aria-label="Garden board">
@@ -258,14 +282,14 @@ function gamePage(demo: boolean): string {
           </div>
           <div class="garden-board" aria-label="Four by four garden beds">
             ${game.beds.map((bed, index) => {
-              const valid = validAction(game!, selectedTool, index);
+              const valid = validAction(game!, selectedTool, index) && canTakeTurn;
               return `<button type="button" class="garden-bed ${valid ? 'valid' : 'invalid'}" data-bed="${index}" aria-label="Bed ${index + 1}: ${bed.stage} ${bed.family}${bed.cared ? ', cared for' : ''}. ${valid ? `Use ${tools[selectedTool].label}` : 'Not available for this tool'}" ${valid ? '' : 'aria-disabled="true"'}>
                 ${bed.cared ? '<span class="cared-mark" aria-hidden="true">♥</span>' : ''}${plantMark(bed.stage, bed.family)}<span class="bed-label">${bed.stage}</span>
               </button>`;
             }).join('')}
           </div>
           <div class="toolbox" role="group" aria-label="Choose an action">
-            ${(Object.keys(tools) as Tool[]).map((tool) => `<button type="button" class="tool ${selectedTool === tool ? 'selected' : ''}" data-tool="${tool}" aria-pressed="${selectedTool === tool}" ${player.away ? 'disabled' : ''}><span>${tools[tool].label}</span><small>${tools[tool].help}</small></button>`).join('')}
+            ${(Object.keys(tools) as Tool[]).map((tool) => `<button type="button" class="tool ${selectedTool === tool ? 'selected' : ''}" data-tool="${tool}" aria-pressed="${selectedTool === tool}" ${player.away || !canTakeTurn ? 'disabled' : ''}><span>${tools[tool].label}</span><small>${tools[tool].help}</small></button>`).join('')}
           </div>
           ${awayText}
         </section>
@@ -275,7 +299,7 @@ function gamePage(demo: boolean): string {
           <section class="panel"><h2>What happened</h2><ul class="history" aria-live="polite">${game.history.slice(-4).map((line) => `<li>${escapeHtml(line)}</li>`).join('')}</ul></section>
         </aside>
       </div>
-      <dialog id="pause-dialog" aria-labelledby="pause-title"><h2 id="pause-title">Game paused</h2><p>Your room is saved in this browser. Return whenever you are ready.</p><div class="dialog-actions"><button type="button" id="resume-game">Resume game</button><a class="button secondary" href="/" data-link>Leave garden</a></div></dialog>
+      <p class="form-error" aria-live="assertive">${escapeHtml(roomError)}</p><dialog id="pause-dialog" aria-labelledby="pause-title"><h2 id="pause-title">Game paused</h2><p>${demo ? 'This sample is saved for this browser session.' : 'Your room is saved by Pause Garden. Return with this browser or join again.'}</p><div class="dialog-actions"><button type="button" id="resume-game">Resume game</button><a class="button secondary" href="/" data-link>Leave garden</a></div></dialog>
       <dialog id="end-dialog" class="end-panel ${game.status === 'lost' ? 'lost' : ''}" aria-labelledby="end-title"><h2 id="end-title">${game.status === 'won' ? 'Garden restored' : 'Chapter complete'}</h2><p>${game.status === 'won' ? `You earned ${game.score} bloom points and met the visitor request.` : `You earned ${game.score} of ${game.target} bloom points. Try a different action order.`}</p><p class="muted">Room ${escapeHtml(game.code)} · ${game.turn} turns · ${game.players.length} players</p><div class="dialog-actions"><button type="button" id="play-again">Play this seed again</button><button type="button" class="secondary" id="new-room">Start a new room</button></div></dialog>
     </main>${footer()}`;
 }
@@ -283,7 +307,7 @@ function gamePage(demo: boolean): string {
 function legalPage(kind: 'privacy' | 'terms'): string {
   const privacy = kind === 'privacy';
   return `${header(`/${kind}`)}<main id="main" class="shell legal-page"><p class="eyebrow">${privacy ? 'Privacy' : 'Terms'}</p><h1>${privacy ? 'Your garden stays on this device' : 'Play fairly and keep your license'}</h1><div class="legal-copy">
-    ${privacy ? `<p>Pause Garden does not require an account. Game names, room progress, sound settings, and a license token stay in your browser storage.</p><h2>What leaves your device</h2><p>The game sends a license token to Sociobot only when you restore or verify a purchase. The hosted checkout has its own payment records. The game sends no garden state or player names.</p><h2>Your choices</h2><p>Clear this site’s browser storage to remove local game data. Demo data uses session storage and ends when that browser session closes.</p><h2>Contact</h2><p>Email <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a> with a privacy question.</p>` : `<p>Pause Garden is a browser game for personal use. You may play the free chapter and demo without an account.</p><h2>Purchase</h2><p>Host Edition costs $6 once. It adds unlimited chapters and custom seeds. Sociobot and Dodo are the merchant of record. A refund revokes the license.</p><h2>License use</h2><p>You may use your license on your own devices. Do not sell or publish the token. Access may stop if a payment is refunded or the token is misused.</p><h2>Game availability</h2><p>The game is provided as available. Local browser data can be lost when you clear site storage. Keep your license token somewhere safe.</p><h2>Contact</h2><p>Email <a href="mailto:support@sociobot.in">support@sociobot.in</a> with a purchase question.</p>`}
+    ${privacy ? `<p>Pause Garden does not require an account. The browser stores your room code, reconnect token, last room state, sound setting, and license token.</p><h2>What leaves your device</h2><p>Online room names, turns, and garden state go only to the product-owned Pause Garden room service. The service stores rooms for up to 30 inactive days. A license token goes to Sociobot only when you restore or verify a purchase.</p><h2>Your choices</h2><p>Clear this site’s browser storage to remove this browser’s reconnect data. Demo data uses session storage, never enters the online room service, and ends with that browser session.</p><h2>Contact</h2><p>Email <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a> with a privacy question.</p>` : `<p>Pause Garden is a browser game for personal use. You may play the free chapter and demo without an account.</p><h2>Purchase</h2><p>Host Edition costs $6 once. It adds unlimited chapters and custom seeds. Sociobot and Dodo are the merchant of record. A refund revokes the license.</p><h2>License use</h2><p>You may use your license on your own devices. Do not sell or publish the token. Access may stop if a payment is refunded or the token is misused.</p><h2>Game availability</h2><p>Online rooms require a connection and expire after 30 inactive days. Keep your license token somewhere safe.</p><h2>Contact</h2><p>Email <a href="mailto:support@sociobot.in">support@sociobot.in</a> with a purchase question.</p>`}
     <p>Last updated: September 1, 2026.</p></div></main>${footer()}`;
 }
 
@@ -306,6 +330,77 @@ function bindCommon(): void {
     render(false);
     await verifyLicense(token, true);
   });
+}
+
+function roomSocketUrl(): string {
+  const url = new URL('/rooms', ROOM_ORIGIN);
+  url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+  return url.toString();
+}
+
+function showRoomError(message: string): void {
+  roomError = message;
+  const region = document.querySelector<HTMLElement>('#setup-error');
+  if (region) region.textContent = message;
+  else if (game) render(false);
+}
+
+function connectRoom(message: Record<string, unknown>, reconnect = false): void {
+  window.clearTimeout(reconnectTimer);
+  roomSocket?.close();
+  connectionState = reconnect ? 'reconnecting' : 'connecting';
+  roomError = '';
+  const socket = new WebSocket(roomSocketUrl());
+  roomSocket = socket;
+  socket.addEventListener('open', () => socket.send(JSON.stringify(message)));
+  socket.addEventListener('message', (event) => {
+    let incoming: { type?: string; state?: GameState; revision?: number; sessionToken?: string; playerId?: number; message?: string };
+    try { incoming = JSON.parse(String(event.data)); } catch { return showRoomError('The room service sent an unreadable response. Try again.'); }
+    if (incoming.type === 'error') return showRoomError(incoming.message || 'The room action could not be completed.');
+    if (incoming.type !== 'room' || !incoming.state || !Number.isInteger(incoming.revision)) return;
+    const wasPlaying = game?.status === 'playing';
+    game = incoming.state;
+    roomRevision = incoming.revision!;
+    const saved = savedRoomSession();
+    if (incoming.sessionToken && Number.isInteger(incoming.playerId)) {
+      const session = { code: game.code, sessionToken: incoming.sessionToken, playerId: incoming.playerId! };
+      localStorage.setItem(ROOM_SESSION_KEY, JSON.stringify(session));
+      remotePlayerId = session.playerId;
+    } else if (saved) remotePlayerId = saved.playerId;
+    connectionState = 'connected';
+    roomError = '';
+    if (wasPlaying && game.status !== 'playing') {
+      const complete = Number(localStorage.getItem(COMPLETE_KEY) || '0');
+      localStorage.setItem(COMPLETE_KEY, String(complete + 1));
+    }
+    saveGame();
+    render(false);
+  });
+  socket.addEventListener('close', () => {
+    if (roomSocket !== socket || route() !== '/play' || !savedRoomSession()) return;
+    connectionState = navigator.onLine ? 'reconnecting' : 'offline';
+    if (game) render(false);
+    reconnectTimer = window.setTimeout(connectSavedRoom, 1_000);
+  });
+  socket.addEventListener('error', () => {
+    if (!game) showRoomError('The online room service is unavailable. Try again in a moment.');
+  });
+}
+
+function connectSavedRoom(): void {
+  const session = savedRoomSession();
+  if (!session || route() !== '/play' || roomSocket?.readyState === WebSocket.OPEN || roomSocket?.readyState === WebSocket.CONNECTING) return;
+  remotePlayerId = session.playerId;
+  connectRoom({ type: 'reconnect', sessionToken: session.sessionToken }, true);
+}
+
+function sendRoomAction(message: Record<string, unknown>): boolean {
+  if (!roomSocket || roomSocket.readyState !== WebSocket.OPEN) {
+    showRoomError('The room is reconnecting. Wait for “Room synced” before acting.');
+    return false;
+  }
+  roomSocket.send(JSON.stringify({ ...message, revision: roomRevision }));
+  return true;
 }
 
 function bindSetup(): void {
@@ -337,10 +432,20 @@ function bindSetup(): void {
       document.querySelector('#setup-error')!.textContent = 'Add at least two player names to create a room.';
       return;
     }
-    game = createGame(names, seed);
     selectedTool = 'plant';
-    saveGame();
-    render(false);
+    const submit = (event.currentTarget as HTMLFormElement).querySelector<HTMLButtonElement>('button[type="submit"]');
+    if (submit) { submit.disabled = true; submit.textContent = 'Creating room…'; }
+    connectRoom({ type: 'create', names, seed });
+  });
+  document.querySelector<HTMLFormElement>('#join-form')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget as HTMLFormElement);
+    const code = String(data.get('code') || '').trim().toUpperCase();
+    const name = String(data.get('name') || '').trim();
+    if (!/^[A-Z0-9]{5}$/.test(code) || !name) return showRoomError('Enter the five-character room code and your chosen player name.');
+    const submit = (event.currentTarget as HTMLFormElement).querySelector<HTMLButtonElement>('button[type="submit"]');
+    if (submit) { submit.disabled = true; submit.textContent = 'Joining room…'; }
+    connectRoom({ type: 'join', code, name });
   });
 }
 
@@ -350,36 +455,48 @@ function bindGame(): void {
     if (game) {
       const player = currentPlayer(game);
       game = setQueuedTool(game, player.id, selectedTool);
-      saveGame();
+      if (isDemo()) saveGame();
+      else sendRoomAction({ type: 'tool', tool: selectedTool });
     }
     render(false);
   }));
   document.querySelectorAll<HTMLButtonElement>('[data-bed]').forEach((button) => button.addEventListener('click', () => {
     if (!game) return;
     const index = Number(button.dataset.bed);
-    if (!validAction(game, selectedTool, index)) {
+    const player = currentPlayer(game);
+    const allowedHere = isDemo() || (connectionState === 'connected' && (player.id === remotePlayerId || player.away));
+    if (!allowedHere || !validAction(game, selectedTool, index)) {
       announce(`That bed cannot use ${tools[selectedTool].label.toLowerCase()}.`);
       return;
     }
-    game = applyAction(game, selectedTool, index);
-    playChime();
-    if (game.status !== 'playing' && !isDemo()) {
-      const complete = Number(localStorage.getItem(COMPLETE_KEY) || '0');
-      localStorage.setItem(COMPLETE_KEY, String(complete + 1));
-    }
-    saveGame();
-    render(false);
+    if (isDemo()) {
+      game = applyAction(game, selectedTool, index);
+      playChime();
+      saveGame();
+      render(false);
+    } else if (sendRoomAction({ type: 'play', tool: selectedTool, bedIndex: index })) playChime();
   }));
   document.querySelectorAll<HTMLButtonElement>('[data-away]').forEach((button) => button.addEventListener('click', () => {
     if (!game) return;
-    game = toggleAway(game, Number(button.dataset.away));
-    saveGame();
-    render(false);
+    if (isDemo()) {
+      game = toggleAway(game, Number(button.dataset.away));
+      saveGame();
+      render(false);
+    } else sendRoomAction({ type: 'away', playerId: Number(button.dataset.away) });
   }));
   document.querySelector('#sound-toggle')?.addEventListener('click', () => {
     soundEnabled = !soundEnabled;
     localStorage.setItem(SOUND_KEY, soundEnabled ? 'on' : 'off');
     render(false);
+  });
+  document.querySelector('#copy-room')?.addEventListener('click', async () => {
+    if (!game) return;
+    try {
+      await navigator.clipboard.writeText(game.code);
+      announce(`Room code ${game.code} copied.`);
+      const button = document.querySelector<HTMLButtonElement>('#copy-room');
+      if (button) button.textContent = 'Room code copied';
+    } catch { announce(`Room code is ${game.code}.`); }
   });
   const pauseDialog = document.querySelector<HTMLDialogElement>('#pause-dialog');
   document.querySelector('#pause-game')?.addEventListener('click', () => { lastFocus = document.activeElement as HTMLElement; pauseDialog?.showModal(); });
@@ -389,10 +506,12 @@ function bindGame(): void {
   document.querySelector('#play-again')?.addEventListener('click', () => {
     if (!game) return;
     const names = game.players.map((player) => player.name);
-    game = createGame(names, game.seed);
-    selectedTool = 'plant';
-    saveGame();
-    render(false);
+    if (isDemo()) {
+      game = createGame(names, game.seed);
+      selectedTool = 'plant';
+      saveGame();
+      render(false);
+    } else sendRoomAction({ type: 'restart' });
   });
   document.querySelector('#new-room')?.addEventListener('click', () => {
     if (isDemo()) {
@@ -400,6 +519,11 @@ function bindGame(): void {
       return;
     }
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(ROOM_SESSION_KEY);
+    roomSocket?.close();
+    roomSocket = null;
+    connectionState = 'local';
+    remotePlayerId = null;
     game = null;
     render(false);
   });
@@ -454,10 +578,15 @@ function render(moveFocus = true): void {
 }
 
 function navigate(path: string): void {
+  if (path !== '/play' && route() === '/play') {
+    roomSocket?.close();
+    roomSocket = null;
+  }
   history.pushState({}, '', path);
   game = null;
   selectedTool = path === '/demo' ? 'tend' : 'plant';
   render(true);
+  if (path === '/play') connectSavedRoom();
 }
 
 function announce(message: string): void {
@@ -542,13 +671,14 @@ function startMotes(): void {
   requestAnimationFrame(frame);
 }
 
-addEventListener('popstate', () => { game = null; render(true); });
-addEventListener('online', () => render(false));
-addEventListener('offline', () => render(false));
+addEventListener('popstate', () => { game = null; render(true); if (route() === '/play') connectSavedRoom(); });
+addEventListener('online', () => { if (route() === '/play') connectSavedRoom(); else render(false); });
+addEventListener('offline', () => { connectionState = 'offline'; render(false); });
 
 const license = takeLicenseFromUrl();
 if (license) void verifyLicense(license);
 render(false);
+if (route() === '/play') connectSavedRoom();
 startMotes();
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
