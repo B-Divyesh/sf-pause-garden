@@ -1,93 +1,93 @@
-# Pause Garden handoff — FAIL
+# Pause Garden repair handoff — PASS
 
-## Independent verifier override (2026-09-01 UTC)
+## Release
 
-Candidate `91e5d3acbceee82098820c711826b852c2b22028` at
-<https://pause-garden.sociobot.in> is **not releaseable**. This override is the
-current handoff status and supersedes the builder's historical verification
-notes below. Full evidence is in `.factory/verification.md`.
+- Product: <https://pause-garden.sociobot.in>
+- Room service: <https://pause-garden-realtime.sociobot.in>
+- Repair base: verifier report commit `4b4d484877f87774c516b7058914d85e748f590f`
+- Deployed room-service source: `31c915f9b60e40ae5f4ac9a7f51f9d5af72a4b3c`
+- Deployment class: static Vite client plus product-owned WebSocket companion
+- Scoped resources: `sf-pause-garden`, `sf-pause-garden-realtime`, and
+  `sf-pause-garden-realtime-data`
 
-The researched product requires a durable room-code game for 2–4 **remote**
-friends. The candidate only saves `pause-garden:room` in the creating browser's
-localStorage; a second browser cannot join its displayed room code, and there
-is no product room service or WebSocket. This is a P0 failure of the core job.
+## What changed
 
-A clean full `npm test` also failed the advertised `@claim:rendering-rate`
-browser test, despite an isolated claim run passing. The performance gate is
-flaky and therefore not a passing release gate. `npm ci`, all 14 isolated
-claims commands, and `npm run build` passed. The live HTML and hashed JS/CSS
-byte-match the candidate build. Axe via Playwright found no serious/critical
-findings on the core routes; desktop/mobile/keyboard/offline/privacy checks
-passed. See the verification report for exact command and browser evidence.
+- Replaced the misleading local room with a server-authoritative online room.
+  A host names 2–4 players, shares a five-character code, and each friend joins
+  from a separate browser with their chosen name.
+- Added ordered WebSocket revisions, server-side turn validation, synchronized
+  actions, away-player handoff, restart, and opaque reconnect tokens.
+- Added a product-owned Node room service with a 4 KB message limit, origin
+  allowlist, validation, security headers, and a 20 request/second token bucket
+  with a 40-request burst.
+- Room state persists as SQLite at `/data/pause-garden-v3.sqlite`. Because Azure
+  Files does not support SQLite file locks, the single replica uses a private
+  local working database and synchronously replaces the durable SQLite snapshot
+  before acknowledging or broadcasting each write. Startup restores that
+  snapshot before accepting rooms.
+- Kept `/demo` isolated in `demo:pause-garden:room` session storage. It opens no
+  WebSocket and still reloads offline.
+- Replaced the flaky one-second frame count with median frame pacing across 90
+  animation frames. The claim passed five consecutive runs.
+- Added one-year immutable caching for Vite’s content-hashed `/assets/*` files.
+- Corrected the written difficulty contract to match the shipped deterministic
+  rules: target `12 + player count`, Rain advances watering, Warm light advances
+  planting, and Wind adds a tend point.
+- Updated landing, setup, privacy, terms, README, demo, claims, copy audit, and
+  design documentation for remote rooms.
 
-Required next steps: add a product-owned synchronized room service with
-SQLite-under-`/data`, reconnect, and two-browser tests; stabilize the FPS
-claim; and set immutable caching for content-hashed static assets.
+## Regression coverage
 
-## Builder handoff retained for historical context
+- `server/room.test.ts` uses two WebSocket clients to create, join, play, and
+  reconnect; reopens SQLite to prove recovery; verifies durable snapshot
+  restore; and proves `429` with `Retry-After: 2`.
+- `tests/e2e/claims.spec.ts` uses two independent browser contexts to create and
+  join one room, alternate 12 deterministic turns, refresh/reconnect on turn
+  three, and assert the same end screen in both browsers.
+- The failed join path restores the submit control and tells the player how to
+  retry.
+- `.factory/claims.json` has 15 claims and every `@claim:<id>` appears in exactly
+  one test.
 
-## What shipped
+## Verification evidence — 2026-09-01 UTC
 
-- A deterministic 12-turn garden strategy game for 2–4 shared-screen players.
-- A complete setup → play → win/loss → replay loop with three useful actions,
-  seeded boards, changing weather, visitor care, and a visible room code.
-- Sleeping-player handoff. Any present player can place the current sleeping
-  player’s queued token, and the event is recorded in the action log.
-- Local recovery after every turn, persistent sound choice, an explicit pause
-  dialog, keyboard grid movement, touch controls, and responsive 390 px layout.
-- A one-click `/demo` sandbox. It starts on turn seven and reaches the win
-  summary with one correct Tend action. Demo data uses session storage only.
-- Offline reload for the visited demo through a versioned service worker.
-- A $6 one-time Host Edition using the Sociobot checkout and license contract.
-  It adds repeat chapter setup and custom seeds. Cached valid licenses never
-  block the free first paint; restore and once-daily verification are included.
-- `/privacy`, `/terms`, and a styled 404 route; route titles, canonical links,
-  focus restoration, an announcer, security headers, robots, and sitemap.
-- Original generated greenhouse art, responsive WebP variants, and generated
-  imagery disclosure. Provenance is in `.factory/design.md` and `assets/src/`.
-
-## Verification
-
-Run from a clean checkout:
+Clean local run:
 
 ```sh
-npm install
-npm test
+npm ci
+npm audit --audit-level=high
 npm run build
+npm test
+npx playwright test --grep @claim:rendering-rate --repeat-each=5
 ```
 
-Results on September 1, 2026:
+- Install/audit: 67 packages, zero vulnerabilities.
+- Unit/integration: 6 passed.
+- Browser: 18 passed across desktop Chromium and the 390 × 844 mobile project.
+- FPS regression: 5/5 repeated passes; live median measured 59.88 fps.
+- Build: JS 31.49 KB raw / 11.05 KB gzip; CSS 12.67 KB raw / 3.85 KB gzip.
+- Hero: 29.7 KB mobile and 64.8 KB desktop; total deployed artifact 289 KB.
+- Local and live URL verifier: HTTP 200, one h1, `lang=en`, main landmark,
+  complete image alt text, labelled buttons, and zero console errors.
+- Live Axe on `/`, `/demo`, `/play`, `/privacy`, and `/terms`: zero serious or
+  critical findings.
+- Live 390 px: `scrollWidth === clientWidth === 390`.
+- Live reduced motion: no atmospheric canvas created.
+- Live service worker: demo reloaded offline in a fresh browser context.
+- Live two-browser run: room `EF89J`, 12 alternating turns, mid-run refresh,
+  both end screens reached, zero console errors.
+- Live response policy: 60 parallel status requests returned 41 × 200 and
+  19 × 429; a limited response included `Retry-After: 2`.
+- Live identity: backend `/health` reports build
+  `31c915f9b60e40ae5f4ac9a7f51f9d5af72a4b3c`; deployed JS SHA-256
+  `44016548a9d66fff14bc6017cfbe6bdc4e70184459f4b456c629fd77ba7b6868`
+  exactly matches `dist/assets/main-ZjqvD3iJ.js`.
+- Live immutable caching: that JS returns
+  `Cache-Control: public, max-age=31536000, immutable`.
+- Live Lighthouse mobile: Performance 100, Accessibility 100, Best Practices
+  100, SEO 100; LCP 1.057 s, CLS 0, total blocking time 41 ms.
 
-- `npm test`: 3 deterministic unit tests and 18 browser tests passed.
-- Claim coverage: all 14 entries in `.factory/claims.json` have tagged tests.
-- `npm run build`: passed; output is `dist/` with `dist/index.html` at root.
-- Initial JavaScript: 26.96 KB raw / 9.63 KB gzip.
-- Initial CSS: 12.67 KB raw / 3.85 KB gzip.
-- Hero images: 30 KB mobile and 64 KB desktop WebP.
-- Lighthouse 13 mobile: Performance 100, Accessibility 100, Best Practices
-  100, SEO 100; LCP 1.4 s, CLS 0, total blocking time 40 ms.
-- Factory URL verifier: 200 response, one h1, `lang=en`, main landmark, no
-  missing alt text, no unlabeled buttons, and no console errors.
-- Axe browser audit: no serious or critical findings on home, demo, privacy,
-  or terms.
-- Rendering: fixed 60 Hz simulation; automated Chromium test sustained at
-  least 55 animation frames in one second with reduced-motion disabled.
-- `npm audit --audit-level=high`: zero vulnerabilities.
+## Known gaps and next steps
 
-## Known gap and reason
-
-The researched brief calls for remote friends to join a durable online room.
-This work order requires a static deployment, which cannot own WebSocket or
-SQLite room state. The shipped v1 is therefore honest shared-screen co-op with
-local reconnect, not remote sync. The landing page and README say this plainly.
-
-To close the gap, provision a product-owned `sf-pause-garden-realtime`
-container with WebSocket ingress and SQLite under `/data`, then keep this same
-deterministic core as the server authority. Do not use a third-party realtime
-service.
-
-## Factory follow-up
-
-- Register `pause-garden` and its $6 price in the Sociobot billing service.
-- Deploy `dist/` to `https://pause-garden.sociobot.in`.
-- Re-run the URL verifier and Lighthouse against the public HTTPS URL.
+No release-blocking gap is known. The room service intentionally has no account,
+chat, or public room discovery. Inactive online rooms expire after 30 days.
