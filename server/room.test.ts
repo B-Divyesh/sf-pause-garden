@@ -69,4 +69,24 @@ describe('product-owned room service', () => {
     expect(limited?.headers.get('retry-after')).toBe('2');
     await service.close();
   });
+
+  it('restores a durable SQLite snapshot while the open database stays local', async () => {
+    const directory = mkdtempSync(join(tmpdir(), 'pause-garden-mirror-'));
+    tempDirs.push(directory);
+    const durable = join(directory, 'data', 'rooms.sqlite');
+    const stateDir = join(directory, 'runtime');
+    const first = createRoomServer(durable, join(stateDir, 'first.sqlite'));
+    const state = first.store.create({
+      version: 1, code: 'ABCDE', seed: 'SAVE-1', rng: 1, turn: 0, maxTurns: 12,
+      score: 0, target: 14, caredCount: 0, visitorTarget: 3, status: 'playing',
+      players: [{ id: 0, name: 'A', away: false, queuedTool: 'plant' }, { id: 1, name: 'B', away: false, queuedTool: 'plant' }],
+      beds: Array.from({ length: 16 }, () => ({ stage: 'empty' as const, family: 'fern' as const, cared: false })),
+      history: [], startedAt: 1,
+    });
+    expect(state.revision).toBe(1);
+    await first.close();
+    const second = createRoomServer(durable, join(stateDir, 'second.sqlite'));
+    expect(second.store.get('ABCDE')?.state.seed).toBe('SAVE-1');
+    await second.close();
+  });
 });

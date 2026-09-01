@@ -1,5 +1,5 @@
 import { DatabaseSync } from 'node:sqlite';
-import { mkdirSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, renameSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { GameState } from '../src/game.js';
 
@@ -10,10 +10,16 @@ export interface StoredRoom {
 
 export class RoomStore {
   private readonly db: DatabaseSync;
+  private readonly durablePath: string | null;
+  private readonly workingPath: string;
 
-  constructor(path: string) {
+  constructor(path: string, workingPath?: string) {
     mkdirSync(dirname(path), { recursive: true });
-    this.db = new DatabaseSync(path);
+    this.durablePath = workingPath ? path : null;
+    this.workingPath = workingPath || path;
+    mkdirSync(dirname(this.workingPath), { recursive: true });
+    if (this.durablePath && existsSync(this.durablePath)) copyFileSync(this.durablePath, this.workingPath);
+    this.db = new DatabaseSync(this.workingPath);
     this.db.exec(`
       PRAGMA journal_mode = DELETE;
       PRAGMA synchronous = FULL;
@@ -33,11 +39,20 @@ export class RoomStore {
       );
       CREATE INDEX IF NOT EXISTS sessions_room_code ON sessions(room_code);
     `);
+    this.persist();
+  }
+
+  private persist(): void {
+    if (!this.durablePath) return;
+    const next = `${this.durablePath}.next`;
+    copyFileSync(this.workingPath, next);
+    renameSync(next, this.durablePath);
   }
 
   create(state: GameState): StoredRoom {
     this.db.prepare('INSERT INTO rooms(code, state, revision, updated_at) VALUES (?, ?, 1, ?)')
       .run(state.code, JSON.stringify(state), Date.now());
+    this.persist();
     return { state, revision: 1 };
   }
 
@@ -50,12 +65,14 @@ export class RoomStore {
     const nextRevision = expectedRevision + 1;
     const result = this.db.prepare('UPDATE rooms SET state = ?, revision = ?, updated_at = ? WHERE code = ? AND revision = ?')
       .run(JSON.stringify(state), nextRevision, Date.now(), code, expectedRevision);
+    if (result.changes === 1) this.persist();
     return result.changes === 1 ? { state, revision: nextRevision } : null;
   }
 
   addSession(token: string, code: string, playerId: number): void {
     this.db.prepare('INSERT INTO sessions(token, room_code, player_id, created_at) VALUES (?, ?, ?, ?)')
       .run(token, code, playerId, Date.now());
+    this.persist();
   }
 
   session(token: string): { code: string; playerId: number } | null {
@@ -65,9 +82,11 @@ export class RoomStore {
 
   deleteOlderThan(timestamp: number): void {
     this.db.prepare('DELETE FROM rooms WHERE updated_at < ?').run(timestamp);
+    this.persist();
   }
 
   close(): void {
+    this.persist();
     this.db.close();
   }
 }

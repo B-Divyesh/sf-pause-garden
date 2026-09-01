@@ -8,12 +8,17 @@ import { RoomStore, type StoredRoom } from './store.js';
 
 const PORT = Number(process.env.PORT || 8787);
 const dataDir = process.env.DATA_DIR || (existsSync('/data') ? '/data' : resolve('data'));
-const dbPath = process.env.DATABASE_PATH || join(dataDir, 'pause-garden-v2.sqlite');
+const dbPath = process.env.DATABASE_PATH || join(dataDir, 'pause-garden-v3.sqlite');
+const workingDbPath = dbPath.startsWith('/data/') ? join('/tmp', `${basenameSafe(dbPath)}-${process.pid}`) : undefined;
 const buildSha = process.env.BUILD_SHA || 'dev';
 const allowedOrigins = new Set(['https://pause-garden.sociobot.in', 'http://127.0.0.1:4173', 'http://localhost:4173']);
 const codeAlphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
 const tools = new Set<Tool>(['plant', 'water', 'tend']);
 const buckets = new Map<string, { tokens: number; updated: number }>();
+
+function basenameSafe(path: string): string {
+  return path.split('/').pop()?.replace(/[^a-zA-Z0-9._-]/g, '') || 'pause-garden.sqlite';
+}
 
 function clientIp(request: IncomingMessage): string {
   return String(request.headers['x-forwarded-for'] || request.socket.remoteAddress || 'unknown').split(',')[0].trim();
@@ -63,8 +68,8 @@ function token(): string {
 
 type Client = WebSocket & { roomCode?: string; playerId?: number; request?: IncomingMessage };
 
-export function createRoomServer(databasePath = dbPath) {
-  const store = new RoomStore(databasePath);
+export function createRoomServer(databasePath = dbPath, workingPath = databasePath === dbPath ? workingDbPath : undefined) {
+  const store = new RoomStore(databasePath, workingPath);
   store.deleteOlderThan(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const clients = new Set<Client>();
   const http = createServer((request, response) => {
