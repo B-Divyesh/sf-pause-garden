@@ -1,4 +1,21 @@
-# Pause Garden repair handoff — PASS
+# Pause Garden verification handoff — FAIL
+
+## Independent verifier override (2026-09-01 UTC)
+
+**Candidate 31c915f9b60e40ae5f4ac9a7f51f9d5af72a4b3c: FAIL.**
+
+All 15 declared claim commands, the full local test suite, and the candidate
+production build passed. Live demo, two-browser remote play/reconnect/end/restart,
+offline, privacy, accessibility, mobile, keyboard, headers, and rate-limit
+checks also passed. The candidate room service is live and identifies itself
+with the requested build SHA.
+
+Release is nevertheless blocked by P1 deployment identity: a fresh candidate
+build produces main-CsZKoNbI.js (or main-CNwY5fXg.js with the production room
+origin), but live HTML serves main-ZjqvD3iJ.js. The live unknown-route behavior
+also differs from candidate configuration. Deploy candidate 31c915f static
+dist, then repeat the identity check. This override supersedes the historical
+PASS notes below; full exact evidence is in .factory/verification-2.md.
 
 ## Release
 
