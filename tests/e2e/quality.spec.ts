@@ -32,3 +32,21 @@ test('@mobile game fits a 390px viewport', async ({ page }) => {
   expect(width.scroll).toBeLessThanOrEqual(width.client);
   await expect(page.locator('[data-tool="tend"]')).toBeVisible();
 });
+
+test('@claim:rendering-rate animation reaches 55 frames per second', async ({ page }) => {
+  await page.goto('/demo');
+  const rate = await page.evaluate(async () => {
+    let frames = 0;
+    const start = performance.now();
+    await new Promise<void>((resolve) => {
+      const count = (now: number) => {
+        frames += 1;
+        if (now - start >= 1_000) resolve();
+        else requestAnimationFrame(count);
+      };
+      requestAnimationFrame(count);
+    });
+    return frames;
+  });
+  expect(rate).toBeGreaterThanOrEqual(55);
+});

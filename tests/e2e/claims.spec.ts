@@ -43,6 +43,7 @@ test('@claim:offline-reload demo reloads after the first visit', async ({ browse
   const page = await context.newPage();
   await page.goto('/demo');
   await page.evaluate(async () => navigator.serviceWorker.ready);
+  await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
   await context.setOffline(true);
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Restore this garden together' })).toBeVisible();
@@ -80,14 +81,34 @@ test('@claim:two-to-four-players setup creates a four-player room', async ({ pag
   await page.getByRole('button', { name: 'Add player' }).click();
   await page.getByRole('button', { name: 'Create room' }).click();
   await expect(page.locator('.player')).toHaveCount(4);
+  await expect(page.getByText('1 of 12', { exact: true })).toBeVisible();
 });
 
 test('@claim:paid-host-edition a cached valid license enables custom seeds', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('sb_license:pause-garden', 'test-license');
     localStorage.setItem('pause-garden:license-verdict', JSON.stringify({ valid: true, checked: Date.now() }));
+    localStorage.setItem('pause-garden:chapters-complete', '4');
   });
+  await page.goto('/');
+  await expect(page.locator('.price')).toContainText('$6');
+  await expect(page.getByRole('link', { name: 'Buy Host Edition' })).toHaveAttribute('href', 'https://api.sociobot.in/api/v1/products/pause-garden/checkout');
   await page.goto('/play');
   await expect(page.getByLabel('Garden seed')).toBeEditable();
   await expect(page.getByText('Host Edition is active')).toBeVisible();
+});
+
+test('@claim:free-chapter a visitor can create the free room without an account', async ({ page }) => {
+  await page.goto('/play');
+  await expect(page.getByRole('button', { name: 'Create room' })).toBeVisible();
+  await page.getByRole('button', { name: 'Create room' }).click();
+  await expect(page.getByText('1 of 12', { exact: true })).toBeVisible();
+  await expect(page.locator('.garden-board')).toBeVisible();
+});
+
+test('@claim:calm-private-rules the game uses turns without account or chat controls', async ({ page }) => {
+  await page.goto('/demo');
+  await expect(page.getByText('7 of 12', { exact: true })).toBeVisible();
+  await expect(page.locator('input[type="email"], input[type="password"], [data-chat]')).toHaveCount(0);
+  await expect(page.getByText(/No timers, combat, or daily streaks/)).toHaveCount(0);
 });

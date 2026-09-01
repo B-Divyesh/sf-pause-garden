@@ -75,6 +75,22 @@ function pageTitle(path: string): string {
   return titles[path] || titles['/404'];
 }
 
+function updateMetadata(path: string): void {
+  const descriptions: Record<string, string> = {
+    '/': 'Play a 12-turn garden chapter with 2–4 friends. A sleeping player never stops the group.',
+    '/demo': 'Try a sample Pause Garden chapter on turn seven with no setup.',
+    '/play': 'Create or resume a shared-screen Pause Garden chapter for 2–4 players.',
+    '/privacy': 'Read what Pause Garden stores in your browser and when it checks a license.',
+    '/terms': 'Read the purchase and license terms for Pause Garden.',
+    '/404': 'This page does not reach the garden. Return home or open the sample game.',
+  };
+  const description = descriptions[path] || descriptions['/404'];
+  document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute('content', description);
+  document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.setAttribute('href', `https://pause-garden.sociobot.in${path}`);
+  document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute('content', pageTitle(path));
+  document.querySelector<HTMLMetaElement>('meta[property="og:description"]')?.setAttribute('content', description);
+}
+
 function header(path: string): string {
   return `<a class="skip-link button" href="#main">Skip to game</a>
     <header class="shell site-header">
@@ -123,7 +139,7 @@ function landing(): string {
           </picture>
         </div>
         <div class="hero-copy">
-          <p class="eyebrow">A 15-minute game for 2–4 players</p>
+          <p class="eyebrow">A 12-turn game for 2–4 players</p>
           <h1>Restore a garden, even when friends <em>pause</em></h1>
           <p class="lede">For friends with interrupted evenings who still want each turn to matter.</p>
           <div class="hero-actions">
@@ -402,6 +418,7 @@ function bindGame(): void {
 function render(moveFocus = true): void {
   const path = route();
   document.title = pageTitle(path);
+  updateMetadata(path);
   if (path === '/demo') {
     game = loadGame(true);
     if (!sessionStorage.getItem(DEMO_KEY)) saveGame();

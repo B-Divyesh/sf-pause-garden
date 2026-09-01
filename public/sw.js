@@ -1,4 +1,4 @@
-const CACHE = 'pause-garden-v1';
+const CACHE = 'pause-garden-v2';
 const CORE = ['/', '/demo', '/art/greenhouse-760.webp', '/art/greenhouse-1200.webp', '/favicon.svg'];
 
 self.addEventListener('install', (event) => {
@@ -25,17 +25,17 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin || event.request.method !== 'GET') return;
   event.respondWith((async () => {
+    const cache = await caches.open(CACHE);
+    const cached = await cache.match(url.pathname, { ignoreSearch: true, ignoreVary: true });
+    if (cached) return cached;
     try {
       const response = await fetch(event.request);
       if (response.ok) {
-        const cache = await caches.open(CACHE);
         cache.put(event.request, response.clone());
       }
       return response;
     } catch {
-      const cached = await caches.match(event.request);
-      if (cached) return cached;
-      if (event.request.mode === 'navigate') return caches.match('/');
+      if (event.request.mode === 'navigate') return cache.match('/');
       return new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
     }
   })());
