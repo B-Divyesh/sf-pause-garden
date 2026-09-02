@@ -2,7 +2,7 @@
 
 ## Release status
 
-Ready for the production deployment configured below. This repair resolves every
+Released on 2026-09-02 UTC. This repair resolves every
 finding in `.factory/verification-4.md` while preserving the deterministic
 12-turn garden game, demo sandbox, online rooms, and local-first settings.
 
@@ -76,6 +76,26 @@ Results:
   `WO_DATA_DIR=/data /opt/fleet/lib/deploy-container.sh pause-garden-realtime /work/repo Dockerfile 8080`.
   The fleet script stamps the image with Git `HEAD`, keeps the SQLite volume at
   `/data`, and pins the stateful service to one replica.
+
+## Live verification
+
+- The deployed `/` SHA-256 is
+  `fadac8095ccd3ae1b29b5b7ac02a7aa0fd20f6ab72e1c6c54d778f99ffb51654`,
+  exactly matching local `dist/index.html`. Its production JavaScript asset
+  `main-BkvH-8yi.js` has matching SHA-256
+  `a0cc7bfb15c49cc8daf4aa89605f66fa775e9fcf3aae9eea1737e756f4fbc485`.
+- The room health endpoint reports the checked-out release candidate and
+  `"storage":"sqlite"`. The container deployment retained `/data` on the
+  product-scoped durable share and one replica.
+- `/`, `/demo`, `/play`, `/privacy`, and `/terms` return HTTP 200. A missing
+  route returns the designed 404 with HTTP 404. Static responses include HSTS,
+  restrictive CSP with `frame-ancestors 'none'`, `nosniff`, referrer policy,
+  permissions policy, and expected cache policy. The room health response is
+  `no-store` with its restrictive response headers.
+- The live URL verifier completed in 669 ms with no console errors, a title,
+  `lang=en`, one h1, one main landmark, and complete image alt text. Axe on all
+  valid and 404 routes at desktop and 390px found no serious, critical, or
+  `region` findings. The live demo service worker updated and reloaded offline.
 
 ## Known gaps
 
