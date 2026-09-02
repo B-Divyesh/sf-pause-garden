@@ -1,12 +1,53 @@
 {
   "communities": {
     "0": [
+      "server_index",
+      "server_index_allowedorigins",
+      "server_index_basenamesafe",
+      "server_index_buckets",
+      "server_index_cleanname",
+      "server_index_client",
+      "server_index_clientip",
+      "server_index_createroomserver",
+      "server_index_createroomserver_attach",
+      "server_index_createroomserver_broadcast",
+      "server_index_createroomserver_fail",
+      "server_index_createroomserver_roommessage",
+      "server_index_createroomserver_send",
+      "server_index_port",
+      "server_index_roomcode",
+      "server_index_sendhttp",
+      "server_index_setheaders",
+      "server_index_takeratetoken",
+      "server_index_token",
+      "server_index_tools",
+      "server_room_test",
+      "server_room_test_nextmessage",
+      "server_room_test_opensocket",
+      "server_room_test_tempdirs",
+      "server_store",
+      "server_store_storedroom",
+      "src_game",
       "src_game_applyaction",
-      "src_game_createdemogame",
+      "src_game_bed",
+      "src_game_creategame",
       "src_game_currentplayer",
+      "src_game_gamestate",
+      "src_game_hashseed",
+      "src_game_nextrng",
+      "src_game_player",
       "src_game_setqueuedtool",
+      "src_game_stage",
+      "src_game_test",
       "src_game_toggleaway",
+      "src_game_tool",
+      "src_game_tools",
       "src_game_validaction",
+      "src_game_weather",
+      "src_game_weatherfor"
+    ],
+    "1": [
+      "src_game_createdemogame",
       "src_main",
       "src_main_announce",
       "src_main_bindcommon",
@@ -43,45 +84,6 @@
       "src_main_startmotes",
       "src_main_updatemetadata"
     ],
-    "1": [
-      "server_index",
-      "server_index_allowedorigins",
-      "server_index_basenamesafe",
-      "server_index_buckets",
-      "server_index_cleanname",
-      "server_index_client",
-      "server_index_clientip",
-      "server_index_createroomserver",
-      "server_index_createroomserver_attach",
-      "server_index_createroomserver_broadcast",
-      "server_index_createroomserver_fail",
-      "server_index_createroomserver_roommessage",
-      "server_index_createroomserver_send",
-      "server_index_port",
-      "server_index_roomcode",
-      "server_index_sendhttp",
-      "server_index_setheaders",
-      "server_index_takeratetoken",
-      "server_index_token",
-      "server_index_tools",
-      "server_room_test",
-      "server_room_test_nextmessage",
-      "server_room_test_opensocket",
-      "server_room_test_tempdirs",
-      "server_store",
-      "server_store_roomstore",
-      "server_store_roomstore_addsession",
-      "server_store_roomstore_close",
-      "server_store_roomstore_constructor",
-      "server_store_roomstore_create",
-      "server_store_roomstore_deleteolderthan",
-      "server_store_roomstore_get",
-      "server_store_roomstore_persist",
-      "server_store_roomstore_session",
-      "server_store_roomstore_update",
-      "server_store_storedroom",
-      "src_game_gamestate"
-    ],
     "2": [
       "package",
       "package_dependencies",
@@ -104,6 +106,7 @@
       "package_scripts_test_static_candidate",
       "package_scripts_test_unit",
       "package_scripts_verify_live_behavior",
+      "package_scripts_verify_live_realtime",
       "package_scripts_verify_live_release",
       "package_type",
       "package_version",
@@ -154,6 +157,25 @@
       "vitest"
     ],
     "5": [
+      "scripts_release_identity_test",
+      "scripts_release_identity_test_candidate",
+      "scripts_release_identity_test_serve",
+      "scripts_release_identity_test_servers",
+      "scripts_release_identity_test_sha256",
+      "scripts_release_identity_test_temporarydirectories",
+      "scripts_verify_realtime_candidate",
+      "scripts_verify_realtime_candidate_cleanorigin",
+      "scripts_verify_realtime_candidate_main",
+      "scripts_verify_realtime_candidate_verifyrealtimecandidate",
+      "scripts_verify_release_identity",
+      "scripts_verify_release_identity_assetreferences",
+      "scripts_verify_release_identity_cleanorigin",
+      "scripts_verify_release_identity_get",
+      "scripts_verify_release_identity_main",
+      "scripts_verify_release_identity_sha256",
+      "scripts_verify_release_identity_verifyreleaseidentity"
+    ],
+    "6": [
       "ref_node",
       "ref_src_game_ts",
       "ref_ts",
@@ -169,36 +191,7 @@
       "server_tsconfig_compileroptions_types",
       "server_tsconfig_include"
     ],
-    "6": [
-      "scripts_release_identity_test",
-      "scripts_release_identity_test_candidate",
-      "scripts_release_identity_test_serve",
-      "scripts_release_identity_test_servers",
-      "scripts_release_identity_test_sha256",
-      "scripts_release_identity_test_temporarydirectories",
-      "scripts_verify_release_identity",
-      "scripts_verify_release_identity_assetreferences",
-      "scripts_verify_release_identity_cleanorigin",
-      "scripts_verify_release_identity_get",
-      "scripts_verify_release_identity_main",
-      "scripts_verify_release_identity_sha256",
-      "scripts_verify_release_identity_verifyreleaseidentity"
-    ],
     "7": [
-      "src_game",
-      "src_game_bed",
-      "src_game_creategame",
-      "src_game_hashseed",
-      "src_game_nextrng",
-      "src_game_player",
-      "src_game_stage",
-      "src_game_test",
-      "src_game_tool",
-      "src_game_tools",
-      "src_game_weather",
-      "src_game_weatherfor"
-    ],
-    "8": [
       "scripts_verify_static_candidate",
       "scripts_verify_static_candidate_assetentries",
       "scripts_verify_static_candidate_config",
@@ -209,6 +202,18 @@
       "scripts_verify_static_candidate_sourceconfig",
       "scripts_verify_static_candidate_text",
       "scripts_verify_static_candidate_validroutes"
+    ],
+    "8": [
+      "server_store_roomstore",
+      "server_store_roomstore_addsession",
+      "server_store_roomstore_close",
+      "server_store_roomstore_constructor",
+      "server_store_roomstore_create",
+      "server_store_roomstore_deleteolderthan",
+      "server_store_roomstore_get",
+      "server_store_roomstore_persist",
+      "server_store_roomstore_session",
+      "server_store_roomstore_update"
     ],
     "9": [
       "scripts_verify_live_behavior",
@@ -266,15 +271,15 @@
     ]
   },
   "cohesion": {
-    "0": 0.1353658536585366,
-    "1": 0.09759759759759759,
-    "2": 0.08,
+    "0": 0.08668076109936575,
+    "1": 0.15396825396825398,
+    "2": 0.07692307692307693,
     "3": 0.08695652173913043,
     "4": 0.11764705882352941,
-    "5": 0.14285714285714285,
-    "6": 0.24358974358974358,
-    "7": 0.25757575757575757,
-    "8": 0.2,
+    "5": 0.19117647058823528,
+    "6": 0.14285714285714285,
+    "7": 0.2,
+    "8": 0.35555555555555557,
     "9": 0.3055555555555556,
     "10": 0.3333333333333333,
     "11": 0.5,
@@ -301,7 +306,7 @@
     {
       "id": "package_scripts",
       "label": "scripts",
-      "degree": 17
+      "degree": 18
     },
     {
       "id": "src_main_bindgame",
@@ -349,7 +354,7 @@
       ],
       "confidence": "EXTRACTED",
       "relation": "calls",
-      "why": "connects across different repos/directories; bridges separate communities"
+      "why": "connects across different repos/directories"
     },
     {
       "source": "createRoomServer()",
@@ -360,7 +365,7 @@
       ],
       "confidence": "EXTRACTED",
       "relation": "calls",
-      "why": "connects across different repos/directories; bridges separate communities"
+      "why": "connects across different repos/directories"
     },
     {
       "source": "createRoomServer()",
@@ -371,7 +376,7 @@
       ],
       "confidence": "EXTRACTED",
       "relation": "calls",
-      "why": "connects across different repos/directories; bridges separate communities"
+      "why": "connects across different repos/directories"
     },
     {
       "source": "createRoomServer()",
@@ -382,7 +387,7 @@
       ],
       "confidence": "EXTRACTED",
       "relation": "calls",
-      "why": "connects across different repos/directories; bridges separate communities"
+      "why": "connects across different repos/directories"
     },
     {
       "source": "createRoomServer()",
@@ -393,7 +398,7 @@
       ],
       "confidence": "EXTRACTED",
       "relation": "calls",
-      "why": "connects across different repos/directories; bridges separate communities"
+      "why": "connects across different repos/directories"
     }
   ],
   "tokens": {
