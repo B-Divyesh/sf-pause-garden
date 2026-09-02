@@ -26,7 +26,9 @@ echo "Deploying sf-pause-garden-realtime from $CANDIDATE with /data preserved"
 IMAGE="sociobotregistry.azurecr.io/sf-pause-garden-realtime:${CANDIDATE:0:12}"
 MOUNT=$(az containerapp show --name sf-pause-garden-realtime --resource-group sociobot \
   --query "properties.template.containers[0].volumeMounts[?mountPath=='/data'].mountPath | [0]" --output tsv)
-if [ "$MOUNT" != "/data" ]; then
+STORAGE=$(az containerapp show --name sf-pause-garden-realtime --resource-group sociobot \
+  --query "properties.template.volumes[?name=='data'].storageName | [0]" --output tsv)
+if [ "$MOUNT" != "/data" ] || [ -z "$STORAGE" ]; then
   echo "Release refused: sf-pause-garden-realtime does not have its existing /data mount." >&2
   exit 1
 fi
@@ -36,10 +38,15 @@ az containerapp update --name sf-pause-garden-realtime --resource-group sociobot
   --image "$IMAGE" --min-replicas 1 --max-replicas 1 --output none
 MOUNT=$(az containerapp show --name sf-pause-garden-realtime --resource-group sociobot \
   --query "properties.template.containers[0].volumeMounts[?mountPath=='/data'].mountPath | [0]" --output tsv)
-if [ "$MOUNT" != "/data" ]; then
-  echo "Release failed: the existing /data mount was not preserved." >&2
+UPDATED_STORAGE=$(az containerapp show --name sf-pause-garden-realtime --resource-group sociobot \
+  --query "properties.template.volumes[?name=='data'].storageName | [0]" --output tsv)
+if [ "$MOUNT" != "/data" ] || [ "$UPDATED_STORAGE" != "$STORAGE" ]; then
+  echo "Release failed: the existing /data mount or storage identity was not preserved." >&2
   exit 1
 fi
+
+echo "Requiring the candidate room service before publishing static files"
+node scripts/verify-realtime-candidate.mjs "$CANDIDATE"
 
 echo "Deploying sf-pause-garden static files from $CANDIDATE"
 /opt/fleet/lib/deploy-static.sh pause-garden "$REPO/dist"

@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { verifyReleaseIdentity } from './verify-release-identity.mjs';
+import { verifyRealtimeCandidate } from './verify-realtime-candidate.mjs';
 
 const candidateCommit = '1ab9ba039c16975014a5ac499447cf3e6f3edcc1';
 const staleRoomCommit = 'f1c883faac0d9b3a93df79b7e51cee6bd84ed30f';
@@ -58,6 +59,32 @@ async function serve(routes) {
 }
 
 describe('same-commit release identity', () => {
+  it('rejects the exact mixed release where static matches and realtime is stale', async () => {
+    const fixture = await candidate();
+    const staticOrigin = await serve({
+      '/': fixture.index,
+      '/build-manifest.json': fixture.manifest,
+      '/sw.js': fixture.serviceWorker,
+      '/assets/main-BkvH-8yi.js': fixture.script,
+      '/assets/main-Ce1lVhFR.css': fixture.style,
+    });
+    const realtimeOrigin = await serve({ '/health': { ok: true, build: staleRoomCommit, storage: 'sqlite' } });
+
+    const result = await verifyReleaseIdentity({ expectedCommit: candidateCommit, candidateDir: fixture.directory, staticOrigin, realtimeOrigin });
+    const realtimeGate = await verifyRealtimeCandidate({ expectedCommit: candidateCommit, realtimeOrigin });
+    expect(result).toMatchObject({
+      ok: false,
+      expectedCommit: candidateCommit,
+      health: { ok: true, build: staleRoomCommit, storage: 'sqlite' },
+      errors: [`room service build ${staleRoomCommit} does not match ${candidateCommit}`],
+    });
+    expect(realtimeGate).toMatchObject({
+      ok: false,
+      health: { ok: true, build: staleRoomCommit, storage: 'sqlite' },
+      errors: [`room service build ${staleRoomCommit} does not match ${candidateCommit}`],
+    });
+  });
+
   it('reproduces the verifier failure when static and realtime are stale', async () => {
     const fixture = await candidate();
     const staleIndex = '<html><head><link href="/assets/main-Ce1lVhFR.css"></head><body><script src="/assets/main-BBPkgcOE.js"></script></body></html>';
@@ -89,6 +116,8 @@ describe('same-commit release identity', () => {
     const realtimeOrigin = await serve({ '/health': { ok: true, build: candidateCommit, storage: 'sqlite' } });
 
     const result = await verifyReleaseIdentity({ expectedCommit: candidateCommit, candidateDir: fixture.directory, staticOrigin, realtimeOrigin });
+    const realtimeGate = await verifyRealtimeCandidate({ expectedCommit: candidateCommit, realtimeOrigin });
     expect(result).toMatchObject({ ok: true, expectedCommit: candidateCommit, errors: [] });
+    expect(realtimeGate).toMatchObject({ ok: true, expectedCommit: candidateCommit, errors: [] });
   });
 });

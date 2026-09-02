@@ -17,6 +17,7 @@
     "test:release-contract": "vitest run scripts/release-identity.test.mjs",
     "test:static-candidate": "npm run build && node scripts/verify-static-candidate.mjs",
     "test:production-artifact": "node scripts/verify-build-isolation.mjs",
+    "verify:live-realtime": "node scripts/verify-realtime-candidate.mjs",
     "verify:live-release": "node scripts/verify-release-identity.mjs",
     "verify:live-behavior": "node scripts/verify-live-behavior.mjs",
     "deploy:production": "bash scripts/deploy-production.sh"
