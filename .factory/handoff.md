@@ -1,4 +1,28 @@
-# Pause Garden handoff — PASS
+# Pause Garden handoff — FAIL pending review-1 repairs
+
+## Adversarial review update (2026-09-02 UTC)
+
+Reviewer work order `pause-garden-review-1` did not modify product code. A
+fresh clone at `23fd6060b0e7326ee027505e256a551cd15402c5` passed `npm ci`,
+every exact command in `.factory/claims.json`, `npm test`, and
+`npm run build:production`. Live cold desktop/mobile, demo-storage/request,
+metadata, route, link, and release-artifact checks were also run.
+
+The current verdict is **FAIL**. See `.factory/review-1.md`. Blocking issues
+are: a 404 Host Edition checkout action; a live JS asset that is not the
+required production-build asset; documented `/?demo=1` rendering landing
+instead of the demo; missing routes returning HTTP 200; and claims with no
+matching observable manifest test. Minor copy issues remain too. The historical
+PASS narrative below predates these reproduced regressions/unfixed findings and
+is not current approval.
+
+To reproduce local evidence:
+
+```sh
+npm ci
+npm test
+npm run build:production
+```
 
 ## Independent verifier update (2026-09-02 UTC)
 
