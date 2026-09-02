@@ -1,112 +1,90 @@
-# Pause Garden verification handoff — FAIL
+# Pause Garden repair handoff
 
-## Independent verifier override (2026-09-01 UTC)
+## Release status
 
-**Candidate 31c915f9b60e40ae5f4ac9a7f51f9d5af72a4b3c: FAIL.**
+**Released.** The static client at <https://pause-garden.sociobot.in> now
+matches release candidate `31c915f9b60e40ae5f4ac9a7f51f9d5af72a4b3c` when
+built with the production room origin. The product-owned realtime service and
+its existing SQLite state under `/data` were not changed.
 
-All 15 declared claim commands, the full local test suite, and the candidate
-production build passed. Live demo, two-browser remote play/reconnect/end/restart,
-offline, privacy, accessibility, mobile, keyboard, headers, and rate-limit
-checks also passed. The candidate room service is live and identifies itself
-with the requested build SHA.
+- Repair commit: `40f3baa fix: deploy exact candidate static client`
+- Static deployment: `sf-pause-garden` (production)
+- Room service retained: `sf-pause-garden-realtime`
+- Production room origin: `https://pause-garden-realtime.sociobot.in`
 
-Release is nevertheless blocked by P1 deployment identity: a fresh candidate
-build produces main-CsZKoNbI.js (or main-CNwY5fXg.js with the production room
-origin), but live HTML serves main-ZjqvD3iJ.js. The live unknown-route behavior
-also differs from candidate configuration. Deploy candidate 31c915f static
-dist, then repeat the identity check. This override supersedes the historical
-PASS notes below; full exact evidence is in .factory/verification-2.md.
+## Reproduced finding and repair
 
-## Release
+Before deployment, live HTML referenced `/assets/main-ZjqvD3iJ.js` with
+SHA-256 `44016548a9d66fff14bc6017cfbe6bdc4e70184459f4b456c629fd77ba7b6868`.
+The exact candidate built with `VITE_ROOM_API=https://pause-garden-realtime.sociobot.in`
+produced `/assets/main-CNwY5fXg.js` with SHA-256
+`35cbd0ba4e244c9efa6066fd04eb842cc99b111278227ab127f2fba1ad3201c6`.
+The old deployment also returned the later 404 page for an unknown route,
+instead of the candidate SPA navigation fallback.
 
-- Product: <https://pause-garden.sociobot.in>
-- Room service: <https://pause-garden-realtime.sociobot.in>
-- Repair base: verifier report commit `4b4d484877f87774c516b7058914d85e748f590f`
-- Deployed room-service source: `31c915f9b60e40ae5f4ac9a7f51f9d5af72a4b3c`
-- Deployment class: static Vite client plus product-owned WebSocket companion
-- Scoped resources: `sf-pause-garden`, `sf-pause-garden-realtime`, and
-  `sf-pause-garden-realtime-data`
+The static deployment was rebuilt from the candidate-equivalent client source
+with the production room origin and uploaded from `dist/`. Candidate
+`navigationFallback` was restored, including its asset exclusions. This means
+an unknown route now returns the application shell with HTTP 200, which is the
+candidate's configured behavior.
 
-## What changed
+`scripts/verify-static-candidate.mjs` is regression coverage executed by
+`npm test`. It rebuilds the production artifact and asserts all of the
+following:
 
-- Replaced the misleading local room with a server-authoritative online room.
-  A host names 2–4 players, shares a five-character code, and each friend joins
-  from a separate browser with their chosen name.
-- Added ordered WebSocket revisions, server-side turn validation, synchronized
-  actions, away-player handoff, restart, and opaque reconnect tokens.
-- Added a product-owned Node room service with a 4 KB message limit, origin
-  allowlist, validation, security headers, and a 20 request/second token bucket
-  with a 40-request burst.
-- Room state persists as SQLite at `/data/pause-garden-v3.sqlite`. Because Azure
-  Files does not support SQLite file locks, the single replica uses a private
-  local working database and synchronously replaces the durable SQLite snapshot
-  before acknowledging or broadcasting each write. Startup restores that
-  snapshot before accepting rooms.
-- Kept `/demo` isolated in `demo:pause-garden:room` session storage. It opens no
-  WebSocket and still reloads offline.
-- Replaced the flaky one-second frame count with median frame pacing across 90
-  animation frames. The claim passed five consecutive runs.
-- Added one-year immutable caching for Vite’s content-hashed `/assets/*` files.
-- Corrected the written difficulty contract to match the shipped deterministic
-  rules: target `12 + player count`, Rain advances watering, Warm light advances
-  planting, and Wind adds a tend point.
-- Updated landing, setup, privacy, terms, README, demo, claims, copy audit, and
-  design documentation for remote rooms.
+- `main-CNwY5fXg.js` has the candidate SHA-256 above;
+- `main-DKua9P12.css` has SHA-256
+  `8f0c21e45e8abb614bd9ee8d9f1ba8e545610113b81c186c08559530c283f10c`;
+- the generated client includes the production room origin;
+- `dist/staticwebapp.config.json` is byte-identical to the candidate source
+  configuration; and
+- unknown routes use the exact candidate navigation fallback rather than later
+  per-route rewrites.
 
-## Regression coverage
-
-- `server/room.test.ts` uses two WebSocket clients to create, join, play, and
-  reconnect; reopens SQLite to prove recovery; verifies durable snapshot
-  restore; and proves `429` with `Retry-After: 2`.
-- `tests/e2e/claims.spec.ts` uses two independent browser contexts to create and
-  join one room, alternate 12 deterministic turns, refresh/reconnect on turn
-  three, and assert the same end screen in both browsers.
-- The failed join path restores the submit control and tells the player how to
-  retry.
-- `.factory/claims.json` has 15 claims and every `@claim:<id>` appears in exactly
-  one test.
-
-## Verification evidence — 2026-09-01 UTC
-
-Clean local run:
+## How to run and verify
 
 ```sh
 npm ci
-npm audit --audit-level=high
-npm run build
 npm test
-npx playwright test --grep @claim:rendering-rate --repeat-each=5
+npm audit --audit-level=high
+npm run build:production
+node scripts/verify-static-candidate.mjs
 ```
 
-- Install/audit: 67 packages, zero vulnerabilities.
-- Unit/integration: 6 passed.
-- Browser: 18 passed across desktop Chromium and the 390 × 844 mobile project.
-- FPS regression: 5/5 repeated passes; live median measured 59.88 fps.
-- Build: JS 31.49 KB raw / 11.05 KB gzip; CSS 12.67 KB raw / 3.85 KB gzip.
-- Hero: 29.7 KB mobile and 64.8 KB desktop; total deployed artifact 289 KB.
-- Local and live URL verifier: HTTP 200, one h1, `lang=en`, main landmark,
-  complete image alt text, labelled buttons, and zero console errors.
-- Live Axe on `/`, `/demo`, `/play`, `/privacy`, and `/terms`: zero serious or
-  critical findings.
-- Live 390 px: `scrollWidth === clientWidth === 390`.
-- Live reduced motion: no atmospheric canvas created.
-- Live service worker: demo reloaded offline in a fresh browser context.
-- Live legal routes return 200; an unknown route returns the styled 404 with
-  HTTP 404.
-- Live two-browser run: room `EF89J`, 12 alternating turns, mid-run refresh,
-  both end screens reached, zero console errors.
-- Live response policy: 60 parallel status requests returned 41 × 200 and
-  19 × 429; a limited response included `Retry-After: 2`.
-- Live identity: backend `/health` reports build
-  `31c915f9b60e40ae5f4ac9a7f51f9d5af72a4b3c`; deployed JS SHA-256
-  `44016548a9d66fff14bc6017cfbe6bdc4e70184459f4b456c629fd77ba7b6868`
-  exactly matches `dist/assets/main-ZjqvD3iJ.js`.
-- Live immutable caching: that JS returns
-  `Cache-Control: public, max-age=31536000, immutable`.
-- Live Lighthouse mobile: Performance 100, Accessibility 100, Best Practices
-  100, SEO 100; LCP 1.057 s, CLS 0, total blocking time 41 ms.
+`npm run build:production` is the artifact command for deployment. It writes
+`dist/` with the production room origin. The normal `npm run build` remains
+usable by local test tooling, which supplies its local room-service origin.
 
-## Known gaps and next steps
+## Verification evidence — 2026-09-02 UTC
 
-No release-blocking gap is known. The room service intentionally has no account,
-chat, or public room discovery. Inactive online rooms expire after 30 days.
+- Clean install: `npm ci` succeeded; `npm audit --audit-level=high` found zero
+  vulnerabilities.
+- Full suite: `npm test` passed — 6 Vitest unit/integration tests and 18
+  Playwright desktop/mobile browser tests, including every declared claim.
+- Production build: 31.16 KB raw / 10.96 KB gzip JavaScript and 12.67 KB raw /
+  3.85 KB gzip CSS. The deployment artifact was 289,082 bytes.
+- Static byte identity after deployment: live HTML references
+  `/assets/main-CNwY5fXg.js`; fetched live SHA-256 is
+  `35cbd0ba4e244c9efa6066fd04eb842cc99b111278227ab127f2fba1ad3201c6`,
+  exactly matching `dist/` and the candidate production build.
+- Live route identity: `/candidate-route-check` returns HTTP 200 and the
+  Pause Garden application shell, as configured by the candidate fallback.
+- Live response policy: hashed JS returns
+  `Cache-Control: public, max-age=31536000, immutable`; CSP, nosniff,
+  Referrer-Policy, and Permissions-Policy are present.
+- `/opt/fleet/lib/verify-url.sh` passed at the live origin: 649 ms load, title,
+  `lang=en`, exactly one h1, a main landmark, no missing image alt text, no
+  unnamed buttons, and no console errors.
+- Live browser smoke: keyboard-only demo reached **Garden restored**; two
+  isolated browser contexts created and joined room `QMAMA`, reloaded the
+  joining player mid-run, and both reached **Chapter complete**; 390 px had no
+  horizontal overflow; Axe found zero serious/critical issues on `/`, `/demo`,
+  `/play`, `/privacy`, and `/terms`.
+- Local claims additionally cover offline demo reload, same-origin demo
+  privacy, persistent sound setting, two-to-four-player setup, and deterministic
+  remote reconnect.
+
+## Known gaps / next steps
+
+No release-blocking product gap is known. Online rooms remain intentionally
+private, account-free, and expire after 30 inactive days.
