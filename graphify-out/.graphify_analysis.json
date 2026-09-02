@@ -1,41 +1,6 @@
 {
   "communities": {
     "0": [
-      "src_main",
-      "src_main_announce",
-      "src_main_bindcommon",
-      "src_main_bindsetup",
-      "src_main_connectroom",
-      "src_main_connectsavedroom",
-      "src_main_demobar",
-      "src_main_escapehtml",
-      "src_main_footer",
-      "src_main_gamepage",
-      "src_main_header",
-      "src_main_isdemo",
-      "src_main_landing",
-      "src_main_legalpage",
-      "src_main_loadgame",
-      "src_main_navigate",
-      "src_main_normalizedemoentry",
-      "src_main_notfound",
-      "src_main_pagetitle",
-      "src_main_plantmark",
-      "src_main_previewboard",
-      "src_main_randomseed",
-      "src_main_render",
-      "src_main_roomsession",
-      "src_main_roomsocketurl",
-      "src_main_route",
-      "src_main_savedroomsession",
-      "src_main_savegame",
-      "src_main_sendroomaction",
-      "src_main_setuppage",
-      "src_main_showroomerror",
-      "src_main_startmotes",
-      "src_main_updatemetadata"
-    ],
-    "1": [
       "server_index",
       "server_index_allowedorigins",
       "server_index_basenamesafe",
@@ -56,13 +21,68 @@
       "server_index_takeratetoken",
       "server_index_token",
       "server_index_tools",
+      "server_room_test",
+      "server_room_test_nextmessage",
+      "server_room_test_opensocket",
+      "server_room_test_tempdirs",
+      "server_store",
+      "server_store_storedroom",
+      "src_game",
       "src_game_applyaction",
+      "src_game_bed",
+      "src_game_creategame",
       "src_game_currentplayer",
+      "src_game_gamestate",
+      "src_game_hashseed",
+      "src_game_nextrng",
+      "src_game_player",
       "src_game_setqueuedtool",
+      "src_game_stage",
+      "src_game_test",
       "src_game_toggleaway",
+      "src_game_tool",
+      "src_game_tools",
       "src_game_validaction",
+      "src_game_weather",
+      "src_game_weatherfor"
+    ],
+    "1": [
+      "src_game_createdemogame",
+      "src_main",
+      "src_main_announce",
+      "src_main_bindcommon",
       "src_main_bindgame",
-      "src_main_playchime"
+      "src_main_bindsetup",
+      "src_main_connectroom",
+      "src_main_connectsavedroom",
+      "src_main_demobar",
+      "src_main_escapehtml",
+      "src_main_footer",
+      "src_main_gamepage",
+      "src_main_header",
+      "src_main_isdemo",
+      "src_main_landing",
+      "src_main_legalpage",
+      "src_main_loadgame",
+      "src_main_navigate",
+      "src_main_normalizedemoentry",
+      "src_main_notfound",
+      "src_main_pagetitle",
+      "src_main_plantmark",
+      "src_main_playchime",
+      "src_main_previewboard",
+      "src_main_randomseed",
+      "src_main_render",
+      "src_main_roomsession",
+      "src_main_roomsocketurl",
+      "src_main_route",
+      "src_main_savedroomsession",
+      "src_main_savegame",
+      "src_main_sendroomaction",
+      "src_main_setuppage",
+      "src_main_showroomerror",
+      "src_main_startmotes",
+      "src_main_updatemetadata"
     ],
     "2": [
       "ref_dom",
@@ -103,6 +123,7 @@
       "package_scripts_dev_rooms",
       "package_scripts_preview",
       "package_scripts_test",
+      "package_scripts_test_production_artifact",
       "package_scripts_test_static_candidate",
       "package_scripts_test_unit",
       "package_type",
@@ -129,25 +150,6 @@
       "vitest"
     ],
     "5": [
-      "server_room_test",
-      "server_room_test_nextmessage",
-      "server_room_test_opensocket",
-      "server_room_test_tempdirs",
-      "server_store",
-      "server_store_roomstore",
-      "server_store_roomstore_addsession",
-      "server_store_roomstore_close",
-      "server_store_roomstore_constructor",
-      "server_store_roomstore_create",
-      "server_store_roomstore_deleteolderthan",
-      "server_store_roomstore_get",
-      "server_store_roomstore_persist",
-      "server_store_roomstore_session",
-      "server_store_roomstore_update",
-      "server_store_storedroom",
-      "src_game_gamestate"
-    ],
-    "6": [
       "ref_node",
       "ref_src_game_ts",
       "ref_ts",
@@ -163,22 +165,7 @@
       "server_tsconfig_compileroptions_types",
       "server_tsconfig_include"
     ],
-    "7": [
-      "src_game",
-      "src_game_bed",
-      "src_game_createdemogame",
-      "src_game_creategame",
-      "src_game_hashseed",
-      "src_game_nextrng",
-      "src_game_player",
-      "src_game_stage",
-      "src_game_test",
-      "src_game_tool",
-      "src_game_tools",
-      "src_game_weather",
-      "src_game_weatherfor"
-    ],
-    "8": [
+    "6": [
       "scripts_verify_static_candidate",
       "scripts_verify_static_candidate_assetentries",
       "scripts_verify_static_candidate_config",
@@ -190,52 +177,74 @@
       "scripts_verify_static_candidate_text",
       "scripts_verify_static_candidate_validroutes"
     ],
-    "9": [
+    "7": [
+      "server_store_roomstore",
+      "server_store_roomstore_addsession",
+      "server_store_roomstore_close",
+      "server_store_roomstore_constructor",
+      "server_store_roomstore_create",
+      "server_store_roomstore_deleteolderthan",
+      "server_store_roomstore_get",
+      "server_store_roomstore_persist",
+      "server_store_roomstore_session",
+      "server_store_roomstore_update"
+    ],
+    "8": [
       "scripts_prepare_static_routes",
       "scripts_prepare_static_routes_assets",
       "scripts_prepare_static_routes_dist",
       "scripts_prepare_static_routes_hashes"
     ],
-    "10": [
+    "9": [
       "scripts_serve_dist",
       "scripts_serve_dist_approutes",
       "scripts_serve_dist_port",
       "scripts_serve_dist_types"
+    ],
+    "10": [
+      "scripts_test",
+      "scripts_test_root",
+      "scripts_test_run"
     ],
     "11": [
       "public_sw",
       "public_sw_core"
     ],
     "12": [
-      "playwright_config"
+      "scripts_verify_build_isolation",
+      "scripts_verify_build_isolation_bundlefor"
     ],
     "13": [
-      "tests_e2e_claims_spec"
+      "playwright_config"
     ],
     "14": [
-      "tests_e2e_quality_spec"
+      "tests_e2e_claims_spec"
     ],
     "15": [
+      "tests_e2e_quality_spec"
+    ],
+    "16": [
       "vite_config"
     ]
   },
   "cohesion": {
-    "0": 0.16098484848484848,
-    "1": 0.1339031339031339,
+    "0": 0.08668076109936575,
+    "1": 0.15396825396825398,
     "2": 0.08695652173913043,
-    "3": 0.1111111111111111,
+    "3": 0.10526315789473684,
     "4": 0.11764705882352941,
-    "5": 0.17647058823529413,
-    "6": 0.14285714285714285,
-    "7": 0.24358974358974358,
-    "8": 0.2,
+    "5": 0.14285714285714285,
+    "6": 0.2,
+    "7": 0.35555555555555557,
+    "8": 0.5,
     "9": 0.5,
-    "10": 0.5,
+    "10": 0.6666666666666666,
     "11": 1.0,
     "12": 1.0,
     "13": 1.0,
     "14": 1.0,
-    "15": 1.0
+    "15": 1.0,
+    "16": 1.0
   },
   "gods": [
     {
@@ -264,19 +273,14 @@
       "degree": 12
     },
     {
-      "id": "src_main_gamepage",
-      "label": "gamePage()",
+      "id": "package_scripts",
+      "label": "scripts",
       "degree": 11
     },
     {
-      "id": "package_scripts",
-      "label": "scripts",
-      "degree": 10
-    },
-    {
-      "id": "src_main_connectroom",
-      "label": "connectRoom()",
-      "degree": 9
+      "id": "src_main_gamepage",
+      "label": "gamePage()",
+      "degree": 11
     },
     {
       "id": "src_game_applyaction",
@@ -287,23 +291,28 @@
       "id": "src_game_creategame",
       "label": "createGame()",
       "degree": 9
+    },
+    {
+      "id": "server_tsconfig_compileroptions",
+      "label": "compilerOptions",
+      "degree": 9
     }
   ],
   "surprises": [
     {
       "source": "createRoomServer()",
-      "target": "createGame()",
+      "target": "applyAction()",
       "source_files": [
         "server/index.ts",
         "src/game.ts"
       ],
       "confidence": "EXTRACTED",
       "relation": "calls",
-      "why": "connects across different repos/directories; bridges separate communities"
+      "why": "connects across different repos/directories"
     },
     {
       "source": "createRoomServer()",
-      "target": "applyAction()",
+      "target": "createGame()",
       "source_files": [
         "server/index.ts",
         "src/game.ts"
