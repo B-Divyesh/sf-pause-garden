@@ -324,13 +324,13 @@
       "degree": 11
     },
     {
-      "id": "src_main_connectroom",
-      "label": "connectRoom()",
+      "id": "src_game_applyaction",
+      "label": "applyAction()",
       "degree": 9
     },
     {
-      "id": "src_game_applyaction",
-      "label": "applyAction()",
+      "id": "src_main_connectroom",
+      "label": "connectRoom()",
       "degree": 9
     },
     {
@@ -343,17 +343,6 @@
     {
       "source": "createRoomServer()",
       "target": "applyAction()",
-      "source_files": [
-        "server/index.ts",
-        "src/game.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "calls",
-      "why": "connects across different repos/directories; bridges separate communities"
-    },
-    {
-      "source": "createRoomServer()",
-      "target": "createGame()",
       "source_files": [
         "server/index.ts",
         "src/game.ts"
@@ -387,6 +376,17 @@
     {
       "source": "createRoomServer()",
       "target": "toggleAway()",
+      "source_files": [
+        "server/index.ts",
+        "src/game.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "createRoomServer()",
+      "target": "validAction()",
       "source_files": [
         "server/index.ts",
         "src/game.ts"
