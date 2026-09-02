@@ -1,48 +1,12 @@
 {
   "communities": {
     "0": [
-      "server_index",
-      "server_index_allowedorigins",
-      "server_index_basenamesafe",
-      "server_index_buckets",
-      "server_index_cleanname",
-      "server_index_client",
-      "server_index_clientip",
-      "server_index_createroomserver",
-      "server_index_createroomserver_attach",
-      "server_index_createroomserver_broadcast",
-      "server_index_createroomserver_fail",
-      "server_index_createroomserver_roommessage",
-      "server_index_createroomserver_send",
-      "server_index_port",
-      "server_index_roomcode",
-      "server_index_sendhttp",
-      "server_index_setheaders",
-      "server_index_takeratetoken",
-      "server_index_token",
-      "server_index_tools",
-      "server_room_test",
-      "server_room_test_nextmessage",
-      "server_room_test_opensocket",
-      "server_room_test_tempdirs",
-      "server_store",
-      "server_store_roomstore",
-      "server_store_roomstore_addsession",
-      "server_store_roomstore_close",
-      "server_store_roomstore_constructor",
-      "server_store_roomstore_create",
-      "server_store_roomstore_deleteolderthan",
-      "server_store_roomstore_get",
-      "server_store_roomstore_persist",
-      "server_store_roomstore_session",
-      "server_store_roomstore_update",
-      "server_store_storedroom",
-      "src_game_gamestate",
-      "src_game_tool"
-    ],
-    "1": [
+      "src_game_applyaction",
+      "src_game_createdemogame",
+      "src_game_currentplayer",
       "src_game_setqueuedtool",
       "src_game_toggleaway",
+      "src_game_validaction",
       "src_main",
       "src_main_announce",
       "src_main_bindcommon",
@@ -79,7 +43,73 @@
       "src_main_startmotes",
       "src_main_updatemetadata"
     ],
+    "1": [
+      "server_index",
+      "server_index_allowedorigins",
+      "server_index_basenamesafe",
+      "server_index_buckets",
+      "server_index_cleanname",
+      "server_index_client",
+      "server_index_clientip",
+      "server_index_createroomserver",
+      "server_index_createroomserver_attach",
+      "server_index_createroomserver_broadcast",
+      "server_index_createroomserver_fail",
+      "server_index_createroomserver_roommessage",
+      "server_index_createroomserver_send",
+      "server_index_port",
+      "server_index_roomcode",
+      "server_index_sendhttp",
+      "server_index_setheaders",
+      "server_index_takeratetoken",
+      "server_index_token",
+      "server_index_tools",
+      "server_room_test",
+      "server_room_test_nextmessage",
+      "server_room_test_opensocket",
+      "server_room_test_tempdirs",
+      "server_store",
+      "server_store_roomstore",
+      "server_store_roomstore_addsession",
+      "server_store_roomstore_close",
+      "server_store_roomstore_constructor",
+      "server_store_roomstore_create",
+      "server_store_roomstore_deleteolderthan",
+      "server_store_roomstore_get",
+      "server_store_roomstore_persist",
+      "server_store_roomstore_session",
+      "server_store_roomstore_update",
+      "server_store_storedroom",
+      "src_game_gamestate"
+    ],
     "2": [
+      "package",
+      "package_dependencies",
+      "package_dependencies_ws",
+      "package_name",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_build_app",
+      "package_scripts_build_production",
+      "package_scripts_build_server",
+      "package_scripts_build_test",
+      "package_scripts_deploy_production",
+      "package_scripts_dev",
+      "package_scripts_dev_rooms",
+      "package_scripts_preview",
+      "package_scripts_test",
+      "package_scripts_test_production_artifact",
+      "package_scripts_test_release_contract",
+      "package_scripts_test_static_candidate",
+      "package_scripts_test_unit",
+      "package_scripts_verify_live_behavior",
+      "package_scripts_verify_live_release",
+      "package_type",
+      "package_version",
+      "ws"
+    ],
+    "3": [
       "ref_dom",
       "ref_dom_iterable",
       "ref_es2022",
@@ -104,30 +134,6 @@
       "tsconfig_compileroptions_usedefineforclassfields",
       "tsconfig_include"
     ],
-    "3": [
-      "package",
-      "package_dependencies",
-      "package_dependencies_ws",
-      "package_name",
-      "package_private",
-      "package_scripts",
-      "package_scripts_build",
-      "package_scripts_build_production",
-      "package_scripts_build_server",
-      "package_scripts_deploy_production",
-      "package_scripts_dev",
-      "package_scripts_dev_rooms",
-      "package_scripts_preview",
-      "package_scripts_test",
-      "package_scripts_test_production_artifact",
-      "package_scripts_test_release_contract",
-      "package_scripts_test_static_candidate",
-      "package_scripts_test_unit",
-      "package_scripts_verify_live_release",
-      "package_type",
-      "package_version",
-      "ws"
-    ],
     "4": [
       "axe_core",
       "package_devdependencies",
@@ -148,23 +154,6 @@
       "vitest"
     ],
     "5": [
-      "src_game",
-      "src_game_applyaction",
-      "src_game_bed",
-      "src_game_createdemogame",
-      "src_game_creategame",
-      "src_game_currentplayer",
-      "src_game_hashseed",
-      "src_game_nextrng",
-      "src_game_player",
-      "src_game_stage",
-      "src_game_test",
-      "src_game_tools",
-      "src_game_validaction",
-      "src_game_weather",
-      "src_game_weatherfor"
-    ],
-    "6": [
       "ref_node",
       "ref_src_game_ts",
       "ref_ts",
@@ -180,7 +169,7 @@
       "server_tsconfig_compileroptions_types",
       "server_tsconfig_include"
     ],
-    "7": [
+    "6": [
       "scripts_release_identity_test",
       "scripts_release_identity_test_candidate",
       "scripts_release_identity_test_serve",
@@ -195,6 +184,20 @@
       "scripts_verify_release_identity_sha256",
       "scripts_verify_release_identity_verifyreleaseidentity"
     ],
+    "7": [
+      "src_game",
+      "src_game_bed",
+      "src_game_creategame",
+      "src_game_hashseed",
+      "src_game_nextrng",
+      "src_game_player",
+      "src_game_stage",
+      "src_game_test",
+      "src_game_tool",
+      "src_game_tools",
+      "src_game_weather",
+      "src_game_weatherfor"
+    ],
     "8": [
       "scripts_verify_static_candidate",
       "scripts_verify_static_candidate_assetentries",
@@ -208,6 +211,17 @@
       "scripts_verify_static_candidate_validroutes"
     ],
     "9": [
+      "scripts_verify_live_behavior",
+      "scripts_verify_live_behavior_evidencedir",
+      "scripts_verify_live_behavior_main",
+      "scripts_verify_live_behavior_realtimeorigin",
+      "scripts_verify_live_behavior_repo",
+      "scripts_verify_live_behavior_staticorigin",
+      "scripts_verify_live_behavior_verifyremotechapter",
+      "scripts_verify_live_behavior_verifyresponsepolicy",
+      "scripts_verify_live_behavior_wait"
+    ],
+    "10": [
       "scripts_prepare_static_routes",
       "scripts_prepare_static_routes_assets",
       "scripts_prepare_static_routes_dist",
@@ -215,62 +229,63 @@
       "scripts_prepare_static_routes_indexurl",
       "scripts_prepare_static_routes_serviceworkerurl"
     ],
-    "10": [
+    "11": [
       "scripts_serve_dist",
       "scripts_serve_dist_approutes",
       "scripts_serve_dist_port",
       "scripts_serve_dist_types"
     ],
-    "11": [
+    "12": [
       "scripts_test",
       "scripts_test_root",
       "scripts_test_run"
     ],
-    "12": [
+    "13": [
       "public_sw",
       "public_sw_core"
     ],
-    "13": [
+    "14": [
       "scripts_deploy_production",
       "scripts_deploy_production_sh__entry"
     ],
-    "14": [
+    "15": [
       "scripts_verify_build_isolation",
       "scripts_verify_build_isolation_bundlefor"
     ],
-    "15": [
+    "16": [
       "playwright_config"
     ],
-    "16": [
+    "17": [
       "tests_e2e_claims_spec"
     ],
-    "17": [
+    "18": [
       "tests_e2e_quality_spec"
     ],
-    "18": [
+    "19": [
       "vite_config"
     ]
   },
   "cohesion": {
-    "0": 0.09388335704125178,
-    "1": 0.14714714714714713,
-    "2": 0.08695652173913043,
-    "3": 0.09090909090909091,
+    "0": 0.1353658536585366,
+    "1": 0.09759759759759759,
+    "2": 0.08,
+    "3": 0.08695652173913043,
     "4": 0.11764705882352941,
-    "5": 0.23809523809523808,
-    "6": 0.14285714285714285,
-    "7": 0.24358974358974358,
+    "5": 0.14285714285714285,
+    "6": 0.24358974358974358,
+    "7": 0.25757575757575757,
     "8": 0.2,
-    "9": 0.3333333333333333,
-    "10": 0.5,
-    "11": 0.6666666666666666,
-    "12": 1.0,
+    "9": 0.3055555555555556,
+    "10": 0.3333333333333333,
+    "11": 0.5,
+    "12": 0.6666666666666666,
     "13": 1.0,
     "14": 1.0,
     "15": 1.0,
     "16": 1.0,
     "17": 1.0,
-    "18": 1.0
+    "18": 1.0,
+    "19": 1.0
   },
   "gods": [
     {
@@ -284,14 +299,14 @@
       "degree": 18
     },
     {
+      "id": "package_scripts",
+      "label": "scripts",
+      "degree": 17
+    },
+    {
       "id": "src_main_bindgame",
       "label": "bindGame()",
       "degree": 15
-    },
-    {
-      "id": "package_scripts",
-      "label": "scripts",
-      "degree": 14
     },
     {
       "id": "tsconfig_compileroptions",
