@@ -37,11 +37,11 @@
       "server_store_roomstore_session",
       "server_store_roomstore_update",
       "server_store_storedroom",
-      "src_game_gamestate",
-      "src_game_setqueuedtool"
+      "src_game_gamestate"
     ],
     "1": [
       "src_game_createdemogame",
+      "src_game_toggleaway",
       "src_main",
       "src_main_announce",
       "src_main_bindcommon",
@@ -112,9 +112,9 @@
       "src_game_hashseed",
       "src_game_nextrng",
       "src_game_player",
+      "src_game_setqueuedtool",
       "src_game_stage",
       "src_game_test",
-      "src_game_toggleaway",
       "src_game_tool",
       "src_game_tools",
       "src_game_validaction",
@@ -125,6 +125,26 @@
       "src_main_plantmark"
     ],
     "4": [
+      "package",
+      "package_dependencies",
+      "package_dependencies_ws",
+      "package_name",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_build_production",
+      "package_scripts_build_server",
+      "package_scripts_dev",
+      "package_scripts_dev_rooms",
+      "package_scripts_preview",
+      "package_scripts_test",
+      "package_scripts_test_static_candidate",
+      "package_scripts_test_unit",
+      "package_type",
+      "package_version",
+      "ws"
+    ],
+    "5": [
       "axe_core",
       "package_devdependencies",
       "package_devdependencies_axe_core",
@@ -143,24 +163,6 @@
       "vite",
       "vitest"
     ],
-    "5": [
-      "package",
-      "package_dependencies",
-      "package_dependencies_ws",
-      "package_name",
-      "package_private",
-      "package_scripts",
-      "package_scripts_build",
-      "package_scripts_build_server",
-      "package_scripts_dev",
-      "package_scripts_dev_rooms",
-      "package_scripts_preview",
-      "package_scripts_test",
-      "package_scripts_test_unit",
-      "package_type",
-      "package_version",
-      "ws"
-    ],
     "6": [
       "ref_node",
       "ref_src_game_ts",
@@ -178,35 +180,46 @@
       "server_tsconfig_include"
     ],
     "7": [
+      "scripts_verify_static_candidate",
+      "scripts_verify_static_candidate_config",
+      "scripts_verify_static_candidate_expectedassets",
+      "scripts_verify_static_candidate_expectedfallback",
+      "scripts_verify_static_candidate_fail",
+      "scripts_verify_static_candidate_root",
+      "scripts_verify_static_candidate_sha256",
+      "scripts_verify_static_candidate_text"
+    ],
+    "8": [
       "public_sw",
       "public_sw_core"
     ],
-    "8": [
+    "9": [
       "playwright_config"
     ],
-    "9": [
+    "10": [
       "tests_e2e_claims_spec"
     ],
-    "10": [
+    "11": [
       "tests_e2e_quality_spec"
     ],
-    "11": [
+    "12": [
       "vite_config"
     ]
   },
   "cohesion": {
-    "0": 0.09246088193456614,
-    "1": 0.1492063492063492,
+    "0": 0.0945945945945946,
+    "1": 0.14414414414414414,
     "2": 0.08695652173913043,
     "3": 0.17543859649122806,
-    "4": 0.11764705882352941,
-    "5": 0.125,
+    "4": 0.1111111111111111,
+    "5": 0.11764705882352941,
     "6": 0.14285714285714285,
-    "7": 1.0,
+    "7": 0.25,
     "8": 1.0,
     "9": 1.0,
     "10": 1.0,
-    "11": 1.0
+    "11": 1.0,
+    "12": 1.0
   },
   "gods": [
     {
@@ -240,9 +253,9 @@
       "degree": 11
     },
     {
-      "id": "src_main_connectroom",
-      "label": "connectRoom()",
-      "degree": 9
+      "id": "package_scripts",
+      "label": "scripts",
+      "degree": 10
     },
     {
       "id": "src_game_applyaction",
@@ -296,7 +309,7 @@
     },
     {
       "source": "createRoomServer()",
-      "target": "toggleAway()",
+      "target": "setQueuedTool()",
       "source_files": [
         "server/index.ts",
         "src/game.ts"
@@ -307,7 +320,7 @@
     },
     {
       "source": "createRoomServer()",
-      "target": "validAction()",
+      "target": "toggleAway()",
       "source_files": [
         "server/index.ts",
         "src/game.ts"
