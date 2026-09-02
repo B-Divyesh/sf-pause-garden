@@ -6,16 +6,19 @@
   "scripts": {
     "dev": "vite",
     "dev:rooms": "tsx server/index.ts",
-    "build": "tsc --noEmit && npm run build:server && vite build && node scripts/prepare-static-routes.mjs",
-    "build:production": "VITE_ROOM_API=https://pause-garden-realtime.sociobot.in npm run build",
+    "build": "VITE_ROOM_API=https://pause-garden-realtime.sociobot.in npm run build:app",
+    "build:production": "npm run build",
+    "build:test": "BUILD_OUT_DIR=test-dist VITE_ROOM_API=http://127.0.0.1:8787 npm run build:app",
+    "build:app": "tsc --noEmit && npm run build:server && vite build && node scripts/prepare-static-routes.mjs",
     "build:server": "tsc -p server/tsconfig.json",
     "preview": "node scripts/serve-dist.mjs",
     "test": "node scripts/test.mjs",
     "test:unit": "vitest run src/game.test.ts server/room.test.ts",
     "test:release-contract": "vitest run scripts/release-identity.test.mjs",
-    "test:static-candidate": "npm run build:production && node scripts/verify-static-candidate.mjs",
+    "test:static-candidate": "npm run build && node scripts/verify-static-candidate.mjs",
     "test:production-artifact": "node scripts/verify-build-isolation.mjs",
     "verify:live-release": "node scripts/verify-release-identity.mjs",
+    "verify:live-behavior": "node scripts/verify-live-behavior.mjs",
     "deploy:production": "bash scripts/deploy-production.sh"
   },
   "dependencies": {

@@ -19,7 +19,7 @@ if [ -n "$DIRTY" ]; then
 fi
 
 echo "Building static and realtime candidate $CANDIDATE"
-BUILD_SHA="$CANDIDATE" npm run build:production
+BUILD_SHA="$CANDIDATE" npm run build
 BUILD_SHA="$CANDIDATE" node scripts/verify-static-candidate.mjs
 
 echo "Deploying sf-pause-garden-realtime from $CANDIDATE with /data preserved"
@@ -46,3 +46,6 @@ echo "Deploying sf-pause-garden static files from $CANDIDATE"
 
 echo "Requiring both live services to match $CANDIDATE"
 node scripts/verify-release-identity.mjs "$CANDIDATE" "$REPO/dist"
+
+echo "Requiring live remote play, reconnect, end screen, and response policy"
+node scripts/verify-live-behavior.mjs

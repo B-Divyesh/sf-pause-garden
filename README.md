@@ -48,20 +48,22 @@ npm run dev:rooms
 npm run dev
 ```
 
-Build the production static files with:
+Build the production static files with either command:
 
 ```sh
+npm run build
 npm run build:production
 ```
 
-This creates `dist/` and uses the production Pause Garden room-server address.
-`npm run build` accepts a local room-server address from the test runner.
+Both commands create the same `dist/` and pin the production Pause Garden
+room-server address. Browser tests use the separate `npm run build:test`
+command, which writes the localhost build to `test-dist/`.
 
 ## Verify
 
 ```sh
 npm test
-npm run build:production
+npm run build
 node scripts/verify-static-candidate.mjs
 ```
 
@@ -81,7 +83,7 @@ away from the static site. See `/privacy` and `/terms`.
 
 ## Deploy
 
-Run `npm run build:production` and `node scripts/verify-static-candidate.mjs`.
+Run `npm run build` and `node scripts/verify-static-candidate.mjs`.
 Deploy that `dist/` directory to `sf-pause-garden`.
 
 The checker validates expected built-file checksums and the production room
@@ -98,6 +100,9 @@ This deploys only `sf-pause-garden` and `sf-pause-garden-realtime`, preserves
 the fleet-created `/data` share, and then compares the live HTML and asset
 hashes with `dist/`. It also requires `/health` to report the same commit.
 `npm run verify:live-release` repeats that check without deploying.
+`npm run verify:live-behavior` opens two independent live browsers, reconnects
+one player, completes all 12 turns, and checks for `429` with
+`Retry-After: 2` after the room-service allowance is exceeded.
 
 ## License
 
