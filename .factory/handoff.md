@@ -2,10 +2,10 @@
 
 ## Release status
 
-**Ready for paired release.** This repair reproduces and blocks the mixed
-static/realtime release found in Verification 8. The production release command
-builds, deploys, and proves both components from the same pushed `HEAD` while
-keeping the existing room-service `/data` storage identity.
+**Released through the paired gate.** This repair reproduces and blocks the
+mixed static/realtime release found in Verification 8. The production release
+command builds, deploys, and proves both components from the same pushed `HEAD`
+while keeping the existing room-service `/data` storage identity.
 
 ## What changed
 
@@ -43,20 +43,29 @@ keeping the existing room-service `/data` storage identity.
 
 ## Deployment and live proof
 
-Run only from a clean, pushed commit:
+The release was run from a clean, pushed commit:
 
 ```sh
 npm run deploy:production
 ```
 
-The command deploys `sf-pause-garden-realtime` first, checks that its existing
-`/data` mount and storage name did not change, waits for `/health` to report
-the current full `HEAD` SHA, and only then deploys `sf-pause-garden`. It then
-requires `npm run verify:live-release` to report `ok: true` with both
-`manifest.sourceCommit` and `health.build` equal to that same SHA. Finally it
-runs `npm run verify:live-behavior`, which creates a two-browser room,
-reconnects a player, completes the twelve-turn chapter to the end screen, and
-checks the `429` response policy.
+The command deployed `sf-pause-garden-realtime` first and preserved the
+existing mount `/data` and storage name `sf-pause-garden-realtime-data`. Before
+static publication, realtime health returned `ok: true`, `storage: "sqlite"`,
+and the current full candidate SHA. The independent post-deploy
+`npm run verify:live-release` also returned `ok: true`: live manifest source,
+static asset checksums, service worker, and room health all matched the same
+full current candidate SHA.
+
+`npm run verify:live-behavior` then created a two-player room, reconnected one
+browser after turn 2, completed all 12 turns, and observed **Chapter complete**
+on the end screen. Its 96-request response-policy probe returned 42 successful
+responses and 54 rate-limited responses, each with `Retry-After: 2`.
+
+The final live URL smoke check loaded in 621 ms with no page or console errors,
+one title, `lang="en"`, one h1, a main landmark, no missing alt text, and no
+unnamed buttons. Live Lighthouse reported performance 99, accessibility 100,
+FCP 0.9 s, LCP 1.1 s, and CLS 0.
 
 The deploy-time JSON evidence is written locally to the ignored
 `release-evidence/` directory so it never becomes a stale candidate artifact.
