@@ -5,6 +5,7 @@ server-dist/
 data/
 test-results/
 playwright-report/
+release-evidence/
 .factory/evidence/
 *.sqlite
 *.sqlite-shm

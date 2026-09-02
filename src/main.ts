@@ -14,6 +14,7 @@ import {
 } from './game';
 
 const root = document.querySelector<HTMLDivElement>('#app')!;
+const BUILD_SHA = document.querySelector<HTMLMetaElement>('meta[name="pause-garden-build"]')?.content || 'unknown';
 const STORAGE_KEY = 'pause-garden:room';
 const ROOM_SESSION_KEY = 'pause-garden:room-session';
 const DEMO_KEY = 'demo:pause-garden:room';
@@ -128,7 +129,7 @@ function footer(): string {
       <div>
         <strong>Pause Garden</strong>
         <div>Restore a garden with 2–4 friends.</div>
-        <div class="footer-note">Original generated scenery. Room data goes only to Pause Garden. Version 1.1.0.</div>
+        <div class="footer-note">Original generated scenery. Room data goes only to Pause Garden. Version 1.1.0 · Build ${BUILD_SHA.slice(0, 7)}.</div>
       </div>
       <div class="footer-links">
         <a href="/privacy" data-link>Privacy</a>

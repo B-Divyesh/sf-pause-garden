@@ -66,7 +66,9 @@ node scripts/verify-static-candidate.mjs
 ```
 
 The suite checks game rules, remote play, reconnect, accessibility, and
-privacy. See `.factory/claims.json` for every claim check.
+privacy. It also recreates a stale static/stale room deployment and requires
+the release identity check to reject it. See `.factory/claims.json` for every
+product claim check.
 
 The animation check samples 90 frames. Its median pacing must reach 55 frames
 per second in the test browser.
@@ -83,11 +85,19 @@ Run `npm run build:production` and `node scripts/verify-static-candidate.mjs`.
 Deploy that `dist/` directory to `sf-pause-garden`.
 
 The checker validates expected built-file checksums and the production room
-address. It also checks the setting that lets valid app links open directly.
+address. It also stamps the source commit into the build manifest, HTML, footer,
+and service-worker cache.
 
-For the room service, build the repository Dockerfile. Run one room server
-that accepts live game connections. Mount the fleet-created data share at
-`/data`.
+Release both components from the same clean, pushed commit:
+
+```sh
+npm run deploy:production
+```
+
+This deploys only `sf-pause-garden` and `sf-pause-garden-realtime`, preserves
+the fleet-created `/data` share, and then compares the live HTML and asset
+hashes with `dist/`. It also requires `/health` to report the same commit.
+`npm run verify:live-release` repeats that check without deploying.
 
 ## License
 

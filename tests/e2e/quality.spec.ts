@@ -56,6 +56,13 @@ test('routes set unique titles, metadata, focus, and HTTP status', async ({ page
   await expect(page.locator('h1')).toBeFocused();
 });
 
+test('@claim:build-identity built pages expose one source identity in metadata and the footer', async ({ page }) => {
+  await page.goto('/');
+  const build = await page.locator('meta[name="pause-garden-build"]').getAttribute('content');
+  expect(build).toMatch(/^[0-9a-f]{40}$/);
+  await expect(page.locator('.footer-note')).toContainText(`Build ${build!.slice(0, 7)}`);
+});
+
 test('every local page link resolves and legal links remain visible', async ({ page, request }) => {
   await page.goto('/');
   const paths = await page.locator('a[href^="/"]').evaluateAll((links) => [...new Set(links.map((link) => (link as HTMLAnchorElement).pathname))]);

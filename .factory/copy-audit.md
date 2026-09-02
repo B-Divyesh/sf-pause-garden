@@ -53,7 +53,7 @@ the 22-word limit. No banned marketing word is present.
 | Restore a garden with 2–4 friends. | 6 | Pass |
 | Original generated scenery. | 3 | Pass |
 | Room data goes only to Pause Garden. | 7 | Pass |
-| Version 1.1.0. | 2 | Pass |
+| Version 1.1.0 · Build [seven-character commit]. | 5 | Pass |
 | Terms | 1 | Pass |
 | Built by Param Factory | 4 | Pass |
 

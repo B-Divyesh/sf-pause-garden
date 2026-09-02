@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 
 const root = new URL('..', import.meta.url);
@@ -10,6 +11,7 @@ const fail = (message) => {
 };
 
 const roomOrigin = 'https://pause-garden-realtime.sociobot.in';
+const expectedCommit = process.env.BUILD_SHA || execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
 const validRoutes = ['/demo', '/play', '/privacy', '/terms'];
 const config = JSON.parse(await text('dist/staticwebapp.config.json'));
 const sourceConfig = JSON.parse(await text('public/staticwebapp.config.json'));
@@ -27,6 +29,12 @@ if (!notFound.includes('Page not found — Pause Garden') || !notFound.includes(
   fail('404.html is not the titled, noindex error document');
 }
 const manifest = JSON.parse(await text('dist/build-manifest.json'));
+if (manifest.sourceCommit !== expectedCommit) fail(`build identity ${manifest.sourceCommit || 'missing'} does not match ${expectedCommit}`);
+if (!index.includes(`<meta name="pause-garden-build" content="${expectedCommit}"`)) fail('index.html does not expose the source commit');
+if (sha256(index) !== manifest.indexSha256) fail('index.html does not match its manifest checksum');
+const serviceWorker = await text('dist/sw.js');
+if (!serviceWorker.includes(expectedCommit) || serviceWorker.includes('__PAUSE_GARDEN_BUILD__')) fail('service worker cache is not scoped to the source commit');
+if (sha256(serviceWorker) !== manifest.serviceWorkerSha256) fail('service worker does not match its manifest checksum');
 const assetEntries = Object.entries(manifest.assets || {});
 if (!assetEntries.length) fail('build manifest has no hashed assets');
 for (const [asset, expected] of assetEntries) {

@@ -11,6 +11,7 @@ function run(command, args) {
 }
 
 run(npm, ['run', 'test:unit']);
+run(npm, ['run', 'test:release-contract']);
 run(npm, ['run', 'test:static-candidate']);
 run(process.execPath, [fileURLToPath(new URL('../node_modules/@playwright/test/cli.js', import.meta.url)), 'test', ...process.argv.slice(2)]);
 run(npm, ['run', 'test:production-artifact']);
