@@ -96,6 +96,27 @@ mount, uploads `dist/` to `sf-pause-garden`, and runs both final live gates.
 Machine-readable results are written to the ignored
 `release-evidence/live-release.json` and `release-evidence/live-behavior.json`.
 
+### Live deployment evidence
+
+The repaired product was deployed from pushed commit
+`cb41a53b5a5150ac6076e0572852a9bc3b4188f4` at 2026-09-02 04:26 UTC.
+
+- Live identity returned `ok: true`. HTML SHA-256 was
+  `6dbcb7531c24592a68c0627839d36748ef4162cc04fb4533fb6092617ad74bea`.
+- Live JavaScript was `/assets/main-OU0I22Qc.js`, 30,481 bytes, SHA-256
+  `62d9ef917f13e74c92d297fe599aad3cc4cda6770c6de26ceb3cf4429e1300c2`.
+- Live CSS was `/assets/main-Ce1lVhFR.css`, 13,044 bytes, SHA-256
+  `47ad7025095ca47acb4af86cc8a13b40936b01ae1529b643f82723dbf0d6af3c`.
+- The room health response reported the same full commit and `storage: sqlite`.
+- Live room `4WJK8` joined in two independent contexts, reconnected after
+  turn two, completed 12 turns, and showed **Chapter complete** to both.
+- The post-deploy 96-request probe returned 42 `200` and 54 `429` responses.
+  Every `429` included `Retry-After: 2`.
+
+This handoff-only follow-up is deployed through the same guarded command, so
+the final public build identity is the repository `HEAD` that contains this
+evidence.
+
 ## Known gaps
 
 None. Host Edition remains honestly unavailable because checkout is not
