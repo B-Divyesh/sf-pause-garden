@@ -240,6 +240,11 @@
       "degree": 11
     },
     {
+      "id": "src_main_connectroom",
+      "label": "connectRoom()",
+      "degree": 9
+    },
+    {
       "id": "src_game_applyaction",
       "label": "applyAction()",
       "degree": 9
@@ -253,25 +258,9 @@
       "id": "server_tsconfig_compileroptions",
       "label": "compilerOptions",
       "degree": 9
-    },
-    {
-      "id": "src_main_connectroom",
-      "label": "connectRoom()",
-      "degree": 9
     }
   ],
   "surprises": [
-    {
-      "source": "createRoomServer()",
-      "target": "toggleAway()",
-      "source_files": [
-        "server/index.ts",
-        "src/game.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "calls",
-      "why": "connects across different repos/directories; bridges separate communities"
-    },
     {
       "source": "createRoomServer()",
       "target": "applyAction()",
@@ -297,6 +286,17 @@
     {
       "source": "createRoomServer()",
       "target": "currentPlayer()",
+      "source_files": [
+        "server/index.ts",
+        "src/game.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "createRoomServer()",
+      "target": "toggleAway()",
       "source_files": [
         "server/index.ts",
         "src/game.ts"
