@@ -273,13 +273,13 @@
       "degree": 12
     },
     {
-      "id": "package_scripts",
-      "label": "scripts",
+      "id": "src_main_gamepage",
+      "label": "gamePage()",
       "degree": 11
     },
     {
-      "id": "src_main_gamepage",
-      "label": "gamePage()",
+      "id": "package_scripts",
+      "label": "scripts",
       "degree": 11
     },
     {
@@ -293,8 +293,8 @@
       "degree": 9
     },
     {
-      "id": "server_tsconfig_compileroptions",
-      "label": "compilerOptions",
+      "id": "src_main_connectroom",
+      "label": "connectRoom()",
       "degree": 9
     }
   ],
