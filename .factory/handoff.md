@@ -1,94 +1,71 @@
-# Pause Garden handoff — FAIL pending review-1 repairs
+# Pause Garden polish round 1 handoff
 
-## Adversarial review update (2026-09-02 UTC)
+## Status
 
-Reviewer work order `pause-garden-review-1` did not modify product code. A
-fresh clone at `23fd6060b0e7326ee027505e256a551cd15402c5` passed `npm ci`,
-every exact command in `.factory/claims.json`, `npm test`, and
-`npm run build:production`. Live cold desktop/mobile, demo-storage/request,
-metadata, route, link, and release-artifact checks were also run.
+Released at <https://pause-garden.sociobot.in>. All findings in
+`.factory/review-1.md` and the earlier verification reports are resolved.
+The released application code is commit
+`fc1ae82cc74409ffc8d1211ef298329b5068bb2e`.
 
-The current verdict is **FAIL**. See `.factory/review-1.md`. Blocking issues
-are: a 404 Host Edition checkout action; a live JS asset that is not the
-required production-build asset; documented `/?demo=1` rendering landing
-instead of the demo; missing routes returning HTTP 200; and claims with no
-matching observable manifest test. Minor copy issues remain too. The historical
-PASS narrative below predates these reproduced regressions/unfixed findings and
-is not current approval.
+The product remains a Vite and TypeScript browser game with a product-owned
+WebSocket room service and SQLite state under `/data`.
 
-To reproduce local evidence:
+## What changed
 
-```sh
-npm ci
-npm test
-npm run build:production
-```
+- `/?demo=1` now opens `/demo` immediately. Demo state stays under
+  `demo:pause-garden:room`, reset works from play and the end summary, and
+  **Start for real** discards it without changing real storage.
+- Valid routes use explicit static rewrites. Unknown paths now return the
+  designed 404 page with HTTP 404.
+- Route titles, descriptions, canonical and social metadata update together.
+  Link navigation and browser Back move focus to the new h1.
+- The broken checkout link and unusable license flow were removed. Host
+  Edition is shown honestly as unavailable, with no payment action.
+- Landing headings and README language now use plain section names and short
+  sentences.
+- Mobile controls meet the 44 px target. The 390 px game has no horizontal
+  overflow. Form errors are linked to their fields and remain retryable.
+- `.factory/claims.json` now lists 20 claims. Added proof covers touch play,
+  weather changes, demo isolation, the room-server boundary, SQLite recovery,
+  30-day cleanup, and the unavailable paid state.
+- The production checker generates and verifies current asset checksums. It
+  also rejects a catch-all fallback that would hide missing pages.
+- The CSP now allows only this site and the Pause Garden room service.
 
-## Independent verifier update (2026-09-02 UTC)
+## Verification
 
-Candidate `31c915f9b60e40ae5f4ac9a7f51f9d5af72a4b3c` at
-<https://pause-garden.sociobot.in> is **PASS**. This status supersedes the
-historical repair narrative below. A clean candidate worktree passed every one
-of the 15 manifest claim commands, `npm test` (6 unit/server and 18 browser
-tests), and `npm run build`. Production HTML, JS, and CSS byte-match that
-build; the product-owned realtime service health endpoint reports the same
-candidate SHA and `storage: "sqlite"`.
+From clean clone `/tmp/pause-garden-final.DWsh40` at `fc1ae82`:
 
-The live run confirmed a cold first screen with a one-click sample, demo win,
-restart reset, persistent sound setting, keyboard/mobile/reduced-motion
-behavior, offline service-worker reload, privacy request boundary, and no
-serious/critical axe findings or console/page errors. A production two-client
-WebSocket run reached turn 12, and the rate limit returned 429 with
-`Retry-After: 2` after a 50-request burst (42 accepted, 8 limited).
+- All 20 exact commands in `.factory/claims.json` passed separately.
+- `npm test` passed 8 unit/server tests and 22 Chromium/mobile tests.
+- `npm audit --audit-level=high` reported zero vulnerabilities.
+- `npm run build:production` and
+  `node scripts/verify-static-candidate.mjs` passed.
+- Production output: 30.28 KB raw / 10.37 KB gzip JavaScript; 12.92 KB raw /
+  3.90 KB gzip CSS; 29,708-byte mobile hero.
 
-Full evidence, hashes, headers, and two non-blocking P3 findings are in
-`.factory/verification-3.md`. The P3 items are the non-working documented
-`/?demo=1` alias and a client-rendered missing page that returns HTTP 200.
+Production checks after the final static and room-service deployments:
 
-## Historical repair handoff
+- Live JavaScript and CSS hashes exactly match local `dist/`.
+- `/`, `/demo`, `/play`, `/privacy`, and `/terms` return 200.
+  `/missing-page` returns 404.
+- Every local and footer link resolves. There is no checkout link.
+- Cold valid-route loads produced no console or page errors.
+- Live Axe checks found zero serious or critical findings on every route,
+  including the 404.
+- `/?demo=1` opens the banner and sample board, uses isolated storage, resets,
+  and removes demo state when leaving.
+- The live demo makes only same-origin requests and reloads offline.
+- Two production browser contexts joined the same room, synchronized a turn,
+  and reconnected after refresh.
+- The room service reports build `fc1ae82cc74409ffc8d1211ef298329b5068bb2e`
+  and SQLite storage.
+- `/opt/fleet/lib/verify-url.sh` passed in 664 ms.
+- Lighthouse mobile scored 100 for Performance, Accessibility, Best Practices,
+  and SEO. LCP was 1.1 s, CLS was 0, and TBT was 20 ms.
+- A live game action completed over two animation frames in 68.6 ms.
 
-## Release status
-
-**Released.** The static client at <https://pause-garden.sociobot.in> now
-matches release candidate `31c915f9b60e40ae5f4ac9a7f51f9d5af72a4b3c` when
-built with the production room origin. The product-owned realtime service and
-its existing SQLite state under `/data` were not changed.
-
-- Repair commit: `40f3baa fix: deploy exact candidate static client`
-- Static deployment: `sf-pause-garden` (production)
-- Room service retained: `sf-pause-garden-realtime`
-- Production room origin: `https://pause-garden-realtime.sociobot.in`
-
-## Reproduced finding and repair
-
-Before deployment, live HTML referenced `/assets/main-ZjqvD3iJ.js` with
-SHA-256 `44016548a9d66fff14bc6017cfbe6bdc4e70184459f4b456c629fd77ba7b6868`.
-The exact candidate built with `VITE_ROOM_API=https://pause-garden-realtime.sociobot.in`
-produced `/assets/main-CNwY5fXg.js` with SHA-256
-`35cbd0ba4e244c9efa6066fd04eb842cc99b111278227ab127f2fba1ad3201c6`.
-The old deployment also returned the later 404 page for an unknown route,
-instead of the candidate SPA navigation fallback.
-
-The static deployment was rebuilt from the candidate-equivalent client source
-with the production room origin and uploaded from `dist/`. Candidate
-`navigationFallback` was restored, including its asset exclusions. This means
-an unknown route now returns the application shell with HTTP 200, which is the
-candidate's configured behavior.
-
-`scripts/verify-static-candidate.mjs` is regression coverage executed by
-`npm test`. It rebuilds the production artifact and asserts all of the
-following:
-
-- `main-CNwY5fXg.js` has the candidate SHA-256 above;
-- `main-DKua9P12.css` has SHA-256
-  `8f0c21e45e8abb614bd9ee8d9f1ba8e545610113b81c186c08559530c283f10c`;
-- the generated client includes the production room origin;
-- `dist/staticwebapp.config.json` is byte-identical to the candidate source
-  configuration; and
-- unknown routes use the exact candidate navigation fallback rather than later
-  per-route rewrites.
-
-## How to run and verify
+Run the same gates with:
 
 ```sh
 npm ci
@@ -98,40 +75,19 @@ npm run build:production
 node scripts/verify-static-candidate.mjs
 ```
 
-`npm run build:production` is the artifact command for deployment. It writes
-`dist/` with the production room origin. The normal `npm run build` remains
-usable by local test tooling, which supplies its local room-service origin.
+## Deployment
 
-## Verification evidence — 2026-09-02 UTC
+- Static resource: `sf-pause-garden`
+- Room resource: `sf-pause-garden-realtime`
+- Durable room data: `/data`
+- Static release command:
+  `/opt/fleet/lib/deploy-static.sh pause-garden /work/repo/dist`
+- Room release command:
+  `WO_DATA_DIR=/data /opt/fleet/lib/deploy-container.sh pause-garden-realtime /work/repo Dockerfile 8080`
 
-- Clean install: `npm ci` succeeded; `npm audit --audit-level=high` found zero
-  vulnerabilities.
-- Full suite: `npm test` passed — 6 Vitest unit/integration tests and 18
-  Playwright desktop/mobile browser tests, including every declared claim.
-- Production build: 31.16 KB raw / 10.96 KB gzip JavaScript and 12.67 KB raw /
-  3.85 KB gzip CSS. The deployment artifact was 289,082 bytes.
-- Static byte identity after deployment: live HTML references
-  `/assets/main-CNwY5fXg.js`; fetched live SHA-256 is
-  `35cbd0ba4e244c9efa6066fd04eb842cc99b111278227ab127f2fba1ad3201c6`,
-  exactly matching `dist/` and the candidate production build.
-- Live route identity: `/candidate-route-check` returns HTTP 200 and the
-  Pause Garden application shell, as configured by the candidate fallback.
-- Live response policy: hashed JS returns
-  `Cache-Control: public, max-age=31536000, immutable`; CSP, nosniff,
-  Referrer-Policy, and Permissions-Policy are present.
-- `/opt/fleet/lib/verify-url.sh` passed at the live origin: 649 ms load, title,
-  `lang=en`, exactly one h1, a main landmark, no missing image alt text, no
-  unnamed buttons, and no console errors.
-- Live browser smoke: keyboard-only demo reached **Garden restored**; two
-  isolated browser contexts created and joined room `QMAMA`, reloaded the
-  joining player mid-run, and both reached **Chapter complete**; 390 px had no
-  horizontal overflow; Axe found zero serious/critical issues on `/`, `/demo`,
-  `/play`, `/privacy`, and `/terms`.
-- Local claims additionally cover offline demo reload, same-origin demo
-  privacy, persistent sound setting, two-to-four-player setup, and deterministic
-  remote reconnect.
+## Known gaps
 
-## Known gaps / next steps
-
-No release-blocking product gap is known. Online rooms remain intentionally
-private, account-free, and expire after 30 inactive days.
+No known correctness, accessibility, privacy, offline, or routing gaps remain.
+Host Edition is intentionally unavailable because the product-scoped Sociobot
+checkout endpoint returns 404. The UI exposes no dead purchase action and does
+not claim that sales are open.

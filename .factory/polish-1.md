@@ -31,4 +31,27 @@ banner, status, 4 × 4 board, actions, goals, players, and history readable.
 
 ## Live deployment evidence
 
-This section is completed after the production upload and cold verification.
+- Static app: <https://pause-garden.sociobot.in>
+- Room service: <https://pause-garden-realtime.sociobot.in>
+- Live static files match local `dist/`: JavaScript SHA-256
+  `e571d77d82e91d810c0050e823b8f60af9ce767a10cce2ffc411d1e22e271a53`;
+  CSS SHA-256
+  `405c7f391d2a8e035a8bd11b155e7eda1c2d99ed35671a1b4dc600c600616b78`.
+- Cold HTTP results: `/`, `/demo`, `/play`, `/privacy`, and `/terms` returned
+  200. `/missing-page` returned 404 with the designed page.
+- `/?demo=1` became `/demo`, displayed turn 7 and the demo banner, preserved a
+  real-storage sentinel, reset after the end summary, and removed demo state
+  on **Start for real**.
+- Live Axe checks found zero serious or critical issues on all five routes and
+  the 404. Route navigation and browser Back both focused the new h1.
+- A 390 × 844 cold context measured `scrollWidth = clientWidth = 390`.
+- The live demo request log was same-origin only. A separate live offline
+  reload kept the board and offline status available.
+- Two live browser contexts joined room `8RXT5`, synchronized turn two, and
+  restored the second player after reload.
+- The room-service health response reported build
+  `fc1ae82cc74409ffc8d1211ef298329b5068bb2e` and `storage: sqlite`.
+- `/opt/fleet/lib/verify-url.sh` passed in 664 ms with no errors.
+- Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100,
+  SEO 100; LCP 1.1 s, CLS 0, TBT 20 ms. A live action updated over two frames
+  in 68.6 ms.
