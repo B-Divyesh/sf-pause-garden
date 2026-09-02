@@ -47,16 +47,19 @@ npm run dev
 The production build command is exactly:
 
 ```sh
-npm run build
+npm run build:production
 ```
 
-It creates `dist/` with `index.html` at its root.
+It creates `dist/` with `index.html` at its root and embeds the production
+Pause Garden room-service origin. `npm run build` is available for local tools
+that supply their own room-service origin.
 
 ## Verify
 
 ```sh
 npm test
-npm run build
+npm run build:production
+node scripts/verify-static-candidate.mjs
 ```
 
 The suite covers deterministic game rules, two-browser join/play/end sync,
@@ -74,7 +77,10 @@ license token to `api.sociobot.in`. See `/privacy` and `/terms`.
 
 ## Deploy
 
-Deploy `dist/` to the existing static site. Deploy the Docker image as
+Run `npm run build:production` followed by
+`node scripts/verify-static-candidate.mjs`, then deploy that `dist/` to the
+existing static site. The checker verifies the exact candidate static hashes,
+production room origin, and SPA fallback configuration. Deploy the Docker image as
 `sf-pause-garden-realtime` with WebSocket ingress and one replica. Mount the
 fleet-created data share at `/data`. The static configuration supplies SPA
 fallback, immutable hashed assets, CSP, and security headers.
