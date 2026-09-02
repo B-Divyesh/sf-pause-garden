@@ -7,10 +7,12 @@
     "dev": "vite",
     "dev:rooms": "tsx server/index.ts",
     "build": "tsc --noEmit && npm run build:server && vite build",
+    "build:production": "VITE_ROOM_API=https://pause-garden-realtime.sociobot.in npm run build",
     "build:server": "tsc -p server/tsconfig.json",
     "preview": "vite preview",
-    "test": "npm run test:unit && playwright test",
-    "test:unit": "vitest run src/game.test.ts server/room.test.ts"
+    "test": "npm run test:unit && npm run test:static-candidate && playwright test",
+    "test:unit": "vitest run src/game.test.ts server/room.test.ts",
+    "test:static-candidate": "npm run build:production && node scripts/verify-static-candidate.mjs"
   },
   "dependencies": {
     "ws": "8.21.3"

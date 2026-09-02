@@ -341,13 +341,7 @@ function roomSocketUrl(): string {
 function showRoomError(message: string): void {
   roomError = message;
   const region = document.querySelector<HTMLElement>('#setup-error');
-  if (region) {
-    region.textContent = message;
-    const create = document.querySelector<HTMLButtonElement>('#setup-form button[type="submit"]');
-    const join = document.querySelector<HTMLButtonElement>('#join-form button[type="submit"]');
-    if (create) { create.disabled = false; create.textContent = 'Create online room'; }
-    if (join) { join.disabled = false; join.textContent = 'Join online room'; }
-  }
+  if (region) region.textContent = message;
   else if (game) render(false);
 }
 

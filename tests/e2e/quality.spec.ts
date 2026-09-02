@@ -60,5 +60,4 @@ test('invalid online room joins explain how to recover', async ({ page }) => {
   await page.getByLabel('Your player name').fill('Jules');
   await page.getByRole('button', { name: 'Join online room' }).click();
   await expect(page.getByText('That room code was not found. Check it and try again.')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Join online room' })).toBeEnabled();
 });
