@@ -123,6 +123,11 @@ test('@claim:two-to-four-players setup creates a four-player room', async ({ pag
   await expect(page.getByText('1 of 12', { exact: true })).toBeVisible();
 });
 
+test('@claim:session-length landing documents the intended 15-minute chapter', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByText('A 12-turn, 15-minute game for 2–4 players')).toBeVisible();
+});
+
 test('@claim:checkout-unavailable the unavailable paid tier has no checkout action', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('button', { name: 'Host Edition unavailable' })).toBeDisabled();

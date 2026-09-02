@@ -10,7 +10,7 @@ the 22-word limit. No banned marketing word is present.
 | Demo | 1 | Pass |
 | Play | 1 | Pass |
 | Privacy | 1 | Pass |
-| A 12-turn game for 2–4 players | 6 | Pass |
+| A 12-turn, 15-minute game for 2–4 players | 7 | Pass |
 | Restore a garden, even when friends pause | 7 | Pass |
 | For friends with interrupted evenings who still want each turn to matter. | 11 | Pass |
 | Try it with sample data | 5 | Pass |

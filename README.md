@@ -2,9 +2,10 @@
 
 Restore a garden with 2–4 friends, even when someone steps away.
 
-Pause Garden is a 12-turn online browser game for 2–4 remote friends. Players
-join a private room by code and take one turn at a time. Weather changes after
-each action. A present player can place a sleeping player’s queued token.
+Pause Garden is a 12-turn online browser game for 2–4 remote friends. Each
+chapter is designed for an interrupted 15-minute session. Players join a
+private room by code and take one turn at a time. Weather changes after each
+action. A present player can place a sleeping player’s queued token.
 
 Each chapter has 12 turns. The goal is to earn enough bloom points and care for
 three beds before the last turn.

@@ -1,118 +1,36 @@
-# Pause Garden verification 4 handoff — FAIL
+# Pause Garden repair 3 handoff
 
-## Current release status
+## Release status
 
-**FAIL.** Independent verification on 2026-09-02 tested candidate
-`4ea7e9338691a1d3c751ce21d715e4c4bba1467f` against
-<https://pause-garden.sociobot.in>. This verdict supersedes the historical
-polish handoff below.
-
-The release-blocking defect is deployment identity. The candidate's exact
-`npm run build:production` output contains `/assets/main-_K6EejvF.js`
-(`e571d77d…1a53`), but production serves `/assets/main-Dzctu8Lw.js`
-(`8efed99f…1ffd`). Running plain `npm run build` reproduces the live HTML and
-JavaScript hashes exactly, proving the default build was deployed instead of
-the designated production build. The room health endpoint also reports earlier
-build `fc1ae82cc74409ffc8d1211ef298329b5068bb2e`, not the candidate.
-
-Every one of the 20 exact claim commands passed after `npm ci`. The aggregate
-`npm test` passed 8 unit/server tests and 22 browser tests; audit and the exact
-production build passed. Fresh live play also passed win, loss, restart,
-reconnect, simultaneous-action, persistence, offline, keyboard, touch, privacy,
-rate-limit, and frame-pacing checks. Those functional passes do not override
-the hard candidate-identity failure.
-
-Additional defects:
-
-- P2: several mobile links have 19–31px-high targets, below the required 44px.
-- P2: a malformed join code writes its error under the create-room form rather
-  than the `#join-error` region referenced by the join fields.
-- P2: the README omits the researched 15-minute intended session length.
-- P3: Axe reports one moderate landmark finding for the demo skip link.
-
-Full hashes, browser evidence, response policy, Lighthouse results, and
-reproduction steps are in `.factory/verification-4.md`.
-
-## Required next steps
-
-1. Fix the touch targets, join-error association, and session-length docs with
-   matching claim coverage where appropriate.
-2. Build the static release with `npm run build:production` and deploy that
-   exact `dist/` output.
-3. Deploy the room service with candidate `BUILD_SHA` and preserve SQLite at
-   `/data`.
-4. Repeat exact hash, health, claims, and live end-to-end verification.
-
----
-
-# Historical polish round 1 handoff
-
-## Status
-
-Released at <https://pause-garden.sociobot.in>. All findings in
-`.factory/review-1.md` and the earlier verification reports are resolved.
-The released application code is commit
-`fc1ae82cc74409ffc8d1211ef298329b5068bb2e`.
-
-The product remains a Vite and TypeScript browser game with a product-owned
-WebSocket room service and SQLite state under `/data`.
+Ready for the production deployment configured below. This repair resolves every
+finding in `.factory/verification-4.md` while preserving the deterministic
+12-turn garden game, demo sandbox, online rooms, and local-first settings.
 
 ## What changed
 
-- `/?demo=1` now opens `/demo` immediately. Demo state stays under
-  `demo:pause-garden:room`, reset works from play and the end summary, and
-  **Start for real** discards it without changing real storage.
-- Valid routes use explicit static rewrites. Unknown paths now return the
-  designed 404 page with HTTP 404.
-- Route titles, descriptions, canonical and social metadata update together.
-  Link navigation and browser Back move focus to the new h1.
-- The broken checkout link and unusable license flow were removed. Host
-  Edition is shown honestly as unavailable, with no payment action.
-- Landing headings and README language now use plain section names and short
-  sentences.
-- Mobile controls meet the 44 px target. The 390 px game has no horizontal
-  overflow. Form errors are linked to their fields and remain retryable.
-- `.factory/claims.json` now lists 20 claims. Added proof covers touch play,
-  weather changes, demo isolation, the room-server boundary, SQLite recovery,
-  30-day cleanup, and the unavailable paid state.
-- The production checker generates and verifies current asset checksums. It
-  also rejects a catch-all fallback that would hide missing pages.
-- The CSP now allows only this site and the Pause Garden room service.
+- Reproduced the release-identity failure before changing code. A production
+  build followed by a local-room build changed `dist/index.html` from
+  `76137a…b197` to `bf7093…95af` and replaced the production JavaScript asset.
+  The cause was Playwright's web server writing its localhost bundle into
+  `dist/` after the production build.
+- Browser tests now build into ignored `test-dist/`. The production artifact
+  stays in `dist/`, and `scripts/verify-build-isolation.mjs` proves the two
+  bundles use their respective room origins. `npm test` ends with this check.
+- Room errors now take an explicit `setup` or `join` target. The exact malformed
+  join (`ABC`, `Noor`) writes only to `#join-error`, which is referenced by the
+  join fields, and the button remains available to retry.
+- The wordmark, purchase-terms link, and privacy/support email links have
+  44px-or-larger target areas at 390px. Regression coverage measures each
+  target at the mobile viewport.
+- The demo skip link now lives inside the header landmark. An Axe regression
+  check requires no `region` violation on `/demo`.
+- The landing page and README now state the researched intended session: a
+  12-turn chapter designed for about 15 minutes. The statement is in
+  `.factory/claims.json` and has a dedicated browser test.
 
-## Verification
+## Local verification
 
-From clean clone `/tmp/pause-garden-final.DWsh40` at `fc1ae82`:
-
-- All 20 exact commands in `.factory/claims.json` passed separately.
-- `npm test` passed 8 unit/server tests and 22 Chromium/mobile tests.
-- `npm audit --audit-level=high` reported zero vulnerabilities.
-- `npm run build:production` and
-  `node scripts/verify-static-candidate.mjs` passed.
-- Production output: 30.28 KB raw / 10.37 KB gzip JavaScript; 12.92 KB raw /
-  3.90 KB gzip CSS; 29,708-byte mobile hero.
-
-Production checks after the final static and room-service deployments:
-
-- Live JavaScript and CSS hashes exactly match local `dist/`.
-- `/`, `/demo`, `/play`, `/privacy`, and `/terms` return 200.
-  `/missing-page` returns 404.
-- Every local and footer link resolves. There is no checkout link.
-- Cold valid-route loads produced no console or page errors.
-- Live Axe checks found zero serious or critical findings on every route,
-  including the 404.
-- `/?demo=1` opens the banner and sample board, uses isolated storage, resets,
-  and removes demo state when leaving.
-- The live demo makes only same-origin requests and reloads offline.
-- Two production browser contexts joined the same room, synchronized a turn,
-  and reconnected after refresh.
-- The room service reports build `fc1ae82cc74409ffc8d1211ef298329b5068bb2e`
-  and SQLite storage.
-- `/opt/fleet/lib/verify-url.sh` passed in 664 ms.
-- Lighthouse mobile scored 100 for Performance, Accessibility, Best Practices,
-  and SEO. LCP was 1.1 s, CLS was 0, and TBT was 20 ms.
-- A live game action completed over two animation frames in 68.6 ms.
-
-Run the same gates with:
+Run from a clean dependency install on 2026-09-02 UTC:
 
 ```sh
 npm ci
@@ -122,19 +40,44 @@ npm run build:production
 node scripts/verify-static-candidate.mjs
 ```
 
+Results:
+
+- `npm ci`: 66 packages installed from the lockfile.
+- `npm test`: 8 Vitest unit/server tests and 27 Playwright desktop/mobile
+  tests passed. The suite covers the deterministic chapter, restart, sleeping
+  handoff, two-browser rooms and reconnect, keyboard and 390px touch play,
+  privacy request boundaries, offline reload, route semantics, metadata,
+  reduced motion, all 21 declared claims, the four repaired verifier findings,
+  and production-artifact isolation.
+- `npm audit --audit-level=high`: zero vulnerabilities.
+- `npm run build:production`: passed. The final production assets are
+  `main-BkvH-8yi.js` (30.37 KB raw, 10.42 KB gzip) and
+  `main-Ce1lVhFR.css` (13.04 KB raw, 3.90 KB gzip). The 760px hero is
+  29,708 bytes.
+- `node scripts/verify-static-candidate.mjs`: passed, confirming production
+  room origin, no localhost fallback, hashes, valid direct routes, and the
+  designed HTTP 404 policy.
+- `/opt/fleet/lib/verify-url.sh http://127.0.0.1:4173/ <evidence-dir>`:
+  passed in 537 ms with no console errors, one h1, one main landmark,
+  `lang=en`, title, and image alt text. The existing Playwright Axe integration
+  passed all serious/critical checks on every route and the added `/demo`
+  region check passed. The standalone Axe CLI could not start its bundled
+  ChromeDriver because it only supports Chrome 152 while the supplied
+  Playwright Chromium is 145; the repository's pinned Playwright/Axe test is
+  the authoritative accessibility run for this worker image.
+
 ## Deployment
 
-- Static resource: `sf-pause-garden`
-- Room resource: `sf-pause-garden-realtime`
-- Durable room data: `/data`
-- Static release command:
-  `/opt/fleet/lib/deploy-static.sh pause-garden /work/repo/dist`
-- Room release command:
-  `WO_DATA_DIR=/data /opt/fleet/lib/deploy-container.sh pause-garden-realtime /work/repo Dockerfile 8080`
+- Static resource: `sf-pause-garden`.
+- Room service: `sf-pause-garden-realtime`.
+- Build the exact static artifact with `npm run build:production`; deploy only
+  that `dist/` with `/opt/fleet/lib/deploy-static.sh pause-garden /work/repo/dist`.
+- Deploy the room service from this checked-out commit with
+  `WO_DATA_DIR=/data /opt/fleet/lib/deploy-container.sh pause-garden-realtime /work/repo Dockerfile 8080`.
+  The fleet script stamps the image with Git `HEAD`, keeps the SQLite volume at
+  `/data`, and pins the stateful service to one replica.
 
 ## Known gaps
 
-No known correctness, accessibility, privacy, offline, or routing gaps remain.
-Host Edition is intentionally unavailable because the product-scoped Sociobot
-checkout endpoint returns 404. The UI exposes no dead purchase action and does
-not claim that sales are open.
+None. Host Edition remains honestly unavailable because the product-scoped
+checkout endpoint is not enabled; no payment link is exposed.

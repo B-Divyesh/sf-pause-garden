@@ -69,7 +69,7 @@ a:hover { color: var(--paper); }
   gap: 20px;
   border-bottom: 1px solid rgb(199 194 178 / 20%);
 }
-.wordmark { color: var(--paper); font-family: Georgia, serif; font-size: 1.25rem; font-weight: 700; text-decoration: none; }
+.wordmark { color: var(--paper); font-family: Georgia, serif; font-size: 1.25rem; font-weight: 700; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
 .site-nav { display: flex; align-items: center; gap: 22px; }
 .site-nav a { color: var(--mist); font-weight: 650; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
 .site-nav a[aria-current="page"] { color: var(--paper); text-decoration: underline; text-decoration-color: var(--coral); }
@@ -126,6 +126,7 @@ p { max-width: 65ch; }
 .price { font-family: Georgia, serif; font-size: 3.8rem; line-height: 1; margin: 12px 0; }
 .price small { font: 1rem/1.5 Inter, system-ui, sans-serif; color: var(--mist); }
 .license-box { border: 1px solid var(--line); padding: 24px; clip-path: polygon(0 0, 94% 0, 100% 18%, 100% 100%, 6% 100%, 0 82%); background: var(--soil); }
+.touch-link { min-height: 44px; display: inline-flex; align-items: center; }
 .inline-form { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
 .field { display: grid; gap: 6px; flex: 1; min-width: 180px; }
 label { font-weight: 700; color: var(--paper); }

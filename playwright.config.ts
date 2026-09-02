@@ -24,7 +24,7 @@ export default defineConfig({
       timeout: 120_000,
     },
     {
-      command: 'VITE_ROOM_API=http://127.0.0.1:8787 npm run build && npm run preview',
+      command: 'BUILD_OUT_DIR=test-dist VITE_ROOM_API=http://127.0.0.1:8787 npm run build && BUILD_OUT_DIR=test-dist npm run preview',
       url: 'http://127.0.0.1:4173',
       reuseExistingServer: true,
       timeout: 120_000,

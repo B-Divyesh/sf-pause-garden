@@ -99,3 +99,45 @@ test('invalid online room joins explain how to recover', async ({ page }) => {
   await page.getByRole('button', { name: 'Join online room' }).click();
   await expect(page.getByText('That room code was not found. Check it and try again.')).toBeVisible();
 });
+
+test('malformed join errors stay with the join form that describes them', async ({ page }) => {
+  await page.goto('/play');
+  await page.getByLabel('Room code').fill('ABC');
+  await page.getByLabel('Your player name').fill('Noor');
+  await page.getByRole('button', { name: 'Join online room' }).click();
+
+  await expect(page.locator('#join-error')).toHaveText('Enter the five-character room code and your chosen player name.');
+  await expect(page.locator('#setup-error')).toBeEmpty();
+  await expect(page.getByLabel('Room code')).toHaveAttribute('aria-describedby', /join-error/);
+  await expect(page.getByRole('button', { name: 'Join online room' })).toBeEnabled();
+});
+
+test('demo skip link remains inside the header landmark', async ({ page }) => {
+  await page.goto('/demo');
+  await expect(page.locator('header .skip-link')).toHaveCount(1);
+  await page.addScriptTag({ content: axe.source });
+  const results = await page.evaluate(async () => {
+    const runner = (window as unknown as { axe: typeof axe }).axe;
+    return runner.run(document);
+  });
+  expect(results.violations.filter((violation) => violation.id === 'region')).toEqual([]);
+});
+
+test('@mobile all reported compact links meet the 44px touch target minimum', async ({ page }) => {
+  const targets = [
+    ['/', 'Pause Garden'],
+    ['/', 'Read the purchase terms'],
+    ['/privacy', 'Pause Garden'],
+    ['/privacy', 'privacy@sociobot.in'],
+    ['/terms', 'Pause Garden'],
+    ['/terms', 'support@sociobot.in'],
+  ] as const;
+
+  for (const [path, name] of targets) {
+    await page.goto(path);
+    const box = await page.getByRole('link', { name, exact: true }).boundingBox();
+    expect(box, `${path} ${name}`).not.toBeNull();
+    expect(box!.height, `${path} ${name} height`).toBeGreaterThanOrEqual(44);
+    expect(box!.width, `${path} ${name} width`).toBeGreaterThanOrEqual(44);
+  }
+});

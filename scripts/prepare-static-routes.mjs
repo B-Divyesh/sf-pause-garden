@@ -2,7 +2,9 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 
-const dist = new URL('../dist/', import.meta.url);
+const outputDir = process.env.BUILD_OUT_DIR || 'dist';
+if (!/^[a-zA-Z0-9_-]+$/.test(outputDir)) throw new Error('BUILD_OUT_DIR must be a simple directory name');
+const dist = new URL(`../${outputDir}/`, import.meta.url);
 const html = await readFile(new URL('index.html', dist), 'utf8');
 const assets = [...html.matchAll(/(?:src|href)="(\/assets\/[^"?]+)"/g)].map((match) => match[1]);
 const hashes = {};

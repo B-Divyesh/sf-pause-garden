@@ -2,7 +2,9 @@ import { createReadStream, existsSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, join, normalize } from 'node:path';
 
-const root = new URL('../dist/', import.meta.url).pathname;
+const outputDir = process.env.BUILD_OUT_DIR || 'dist';
+if (!/^[a-zA-Z0-9_-]+$/.test(outputDir)) throw new Error('BUILD_OUT_DIR must be a simple directory name');
+const root = new URL(`../${outputDir}/`, import.meta.url).pathname;
 const port = Number(process.env.PORT || 4173);
 const appRoutes = new Set(['/', '/demo', '/play', '/privacy', '/terms']);
 const types = {
