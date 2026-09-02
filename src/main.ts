@@ -198,10 +198,10 @@ function landing(): string {
     </main>${footer()}`;
 }
 
-function demoBar(): string {
-  return `<aside class="demo-bar" aria-label="Demo mode">
+function demoBar(blocked = false): string {
+  return `<aside class="demo-bar" aria-label="Demo mode" ${blocked ? 'inert' : ''}>
     <strong>Demo — sample data, nothing is saved</strong>
-    <button type="button" class="secondary" id="reset-demo">Reset demo</button>
+    <button type="button" class="secondary" data-reset-demo>Reset demo</button>
     <a class="button secondary" href="/play" data-link>Start for real</a>
   </aside>`;
 }
@@ -254,7 +254,7 @@ function gamePage(demo: boolean): string {
   const awayText = player.away
     ? `<p class="sleep-note"><strong>${escapeHtml(player.name)} is sleeping.</strong> Place their queued ${tools[player.queuedTool].label.toLowerCase()} token for them.</p>`
     : '';
-  return `${demo ? demoBar() : ''}${header(demo ? '/demo' : '/play')}
+  return `${demo ? demoBar(game.status !== 'playing') : ''}${header(demo ? '/demo' : '/play')}
     <main id="main" class="shell game-page">
       <div class="game-title-row">
         <div><p class="eyebrow">Room ${escapeHtml(game.code)} · Seed ${escapeHtml(game.seed)}</p><h1>Restore this garden together</h1><p class="connection ${connectionState === 'offline' || !navigator.onLine ? 'offline' : ''}" aria-live="polite">${connectionCopy}</p>${demo ? '' : '<p class="invite-note">Share the room code and each player’s chosen name.</p>'}</div>
@@ -288,7 +288,7 @@ function gamePage(demo: boolean): string {
         </aside>
       </div>
       <p class="form-error" aria-live="assertive">${escapeHtml(roomError)}</p><dialog id="pause-dialog" aria-labelledby="pause-title"><h2 id="pause-title">Game paused</h2><p>${demo ? 'This sample is saved for this browser session.' : 'Your room is saved by Pause Garden. Return with this browser or join again.'}</p><div class="dialog-actions"><button type="button" id="resume-game">Resume game</button><a class="button secondary" href="/" data-link>Leave garden</a></div></dialog>
-      <dialog id="end-dialog" class="end-panel ${game.status === 'lost' ? 'lost' : ''}" aria-labelledby="end-title"><h2 id="end-title">${game.status === 'won' ? 'Garden restored' : 'Chapter complete'}</h2><p>${game.status === 'won' ? `You earned ${game.score} bloom points and met the visitor request.` : `You earned ${game.score} of ${game.target} bloom points. Try a different action order.`}</p><p class="muted">Room ${escapeHtml(game.code)} · ${game.turn} turns · ${game.players.length} players</p><div class="dialog-actions"><button type="button" id="play-again">Play this seed again</button><button type="button" class="secondary" id="new-room">Start a new room</button></div></dialog>
+      <dialog id="end-dialog" class="end-panel ${game.status === 'lost' ? 'lost' : ''}" aria-labelledby="end-title"><h2 id="end-title">${game.status === 'won' ? 'Garden restored' : 'Chapter complete'}</h2><p>${game.status === 'won' ? `You earned ${game.score} bloom points and met the visitor request.` : `You earned ${game.score} of ${game.target} bloom points. Try a different action order.`}</p><p class="muted">Room ${escapeHtml(game.code)} · ${game.turn} turns · ${game.players.length} players</p><div class="dialog-actions"><button type="button" id="play-again">Play this seed again</button>${demo ? '<button type="button" class="secondary" data-reset-demo>Reset demo</button>' : ''}<button type="button" class="secondary" id="new-room">Start a new room</button></div></dialog>
     </main>${footer()}`;
 }
 
@@ -515,14 +515,14 @@ function bindGame(): void {
     game = null;
     render(false);
   });
-  document.querySelector('#reset-demo')?.addEventListener('click', () => {
+  document.querySelectorAll('[data-reset-demo]').forEach((button) => button.addEventListener('click', () => {
     sessionStorage.removeItem(DEMO_KEY);
     game = createDemoGame();
     selectedTool = 'tend';
     saveGame();
     render(false);
     announce('Demo reset to turn seven.');
-  });
+  }));
   const board = document.querySelector<HTMLElement>('.garden-board');
   board?.addEventListener('keydown', (event) => {
     const target = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-bed]');

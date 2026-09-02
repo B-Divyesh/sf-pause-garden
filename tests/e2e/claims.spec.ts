@@ -143,6 +143,9 @@ test('@claim:demo-isolation query demo uses separate storage and discards it on 
     demo: sessionStorage.getItem('demo:pause-garden:room'),
     real: localStorage.getItem('pause-garden:room'),
   }))).toEqual({ demo: expect.any(String), real: 'real-room-sentinel' });
+  await page.getByRole('button', { name: /Bed 3: growing fern.*Use Tend plant/ }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Reset demo' }).click();
+  await expect(page.getByText('7 of 12', { exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Start for real' }).click();
   await expect(page).toHaveURL(/\/play$/);
   expect(await page.evaluate(() => ({
