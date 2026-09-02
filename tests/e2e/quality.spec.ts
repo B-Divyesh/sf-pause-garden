@@ -1,4 +1,5 @@
 import axe from 'axe-core';
+import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 
 test('landing and demo have no serious accessibility findings', async ({ page }) => {
@@ -61,6 +62,25 @@ test('@claim:build-identity built pages expose one source identity in metadata a
   const build = await page.locator('meta[name="pause-garden-build"]').getAttribute('content');
   expect(build).toMatch(/^[0-9a-f]{40}$/);
   await expect(page.locator('.footer-note')).toContainText(`Build ${build!.slice(0, 7)}`);
+});
+
+test('@claim:production-default-build the default and named production builds use the production room service', async () => {
+  const root = new URL('../../', import.meta.url);
+  const packageJson = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
+  const bundle = async (directory: string) => {
+    const manifest = JSON.parse(await readFile(new URL(`${directory}/build-manifest.json`, root), 'utf8'));
+    const script = Object.keys(manifest.assets).find((asset) => asset.endsWith('.js'));
+    expect(script).toBeTruthy();
+    return readFile(new URL(`${directory}${script}`, root), 'utf8');
+  };
+
+  expect(packageJson.scripts['build:production']).toBe('npm run build');
+  const production = await bundle('dist');
+  const testBundle = await bundle('test-dist');
+  expect(production).toContain('https://pause-garden-realtime.sociobot.in');
+  expect(production).not.toContain('http://127.0.0.1:8787');
+  expect(testBundle).toContain('http://127.0.0.1:8787');
+  expect(testBundle).not.toContain('https://pause-garden-realtime.sociobot.in');
 });
 
 test('every local page link resolves and legal links remain visible', async ({ page, request }) => {

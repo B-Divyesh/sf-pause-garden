@@ -34,6 +34,8 @@ now makes both behaviors part of every production deploy.
   checks both bundles after the full browser suite.
 - The static candidate test runs the default build, so the generic deployment
   entry point cannot silently produce different bytes again.
+- The `@claim:production-default-build` browser regression inspects both built
+  bundles and requires the production and local room origins to stay isolated.
 - `scripts/verify-live-behavior.mjs` creates and joins a real room in two
   independent browser contexts, reconnects the friend after turn two,
   alternates 12 valid turns, and requires both end summaries.
@@ -60,10 +62,10 @@ node scripts/verify-static-candidate.mjs
 ```
 
 - Clean install: 66 packages, zero reported vulnerabilities.
-- Full suite: 8 unit/server tests, 2 release-contract tests, and 28
+- Full suite: 8 unit/server tests, 2 release-contract tests, and 29
   desktop/mobile Playwright checks passed. TypeScript checks passed for the
   client and room server. Production/test artifact isolation passed.
-- Every one of the 22 exact commands in `.factory/claims.json` passed when run
+- Every one of the 23 exact commands in `.factory/claims.json` passed when run
   independently.
 - Production output: 30.48 kB JavaScript raw / 10.46 kB gzip; 13.04 kB CSS
   raw / 3.90 kB gzip; 332 kB total including original product art.
