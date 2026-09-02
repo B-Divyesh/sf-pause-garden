@@ -14,7 +14,7 @@
     "preview": "node scripts/serve-dist.mjs",
     "test": "node scripts/test.mjs",
     "test:unit": "vitest run src/game.test.ts server/room.test.ts",
-    "test:release-contract": "vitest run scripts/release-identity.test.mjs",
+    "test:release-contract": "vitest run scripts/release-identity.test.mjs scripts/deploy-production.test.mjs",
     "test:static-candidate": "npm run build && node scripts/verify-static-candidate.mjs",
     "test:production-artifact": "node scripts/verify-build-isolation.mjs",
     "verify:live-realtime": "node scripts/verify-realtime-candidate.mjs",

@@ -20,13 +20,15 @@ export default defineConfig({
     {
       command: 'DATABASE_PATH=/tmp/pause-garden-e2e.sqlite npm run dev:rooms',
       url: 'http://127.0.0.1:8787/health',
-      reuseExistingServer: true,
+      // A production preview can use this port with the live room endpoint.
+      // Refuse it instead of letting a browser claim silently test that build.
+      reuseExistingServer: false,
       timeout: 120_000,
     },
     {
       command: 'npm run build:test && BUILD_OUT_DIR=test-dist npm run preview',
       url: 'http://127.0.0.1:4173',
-      reuseExistingServer: true,
+      reuseExistingServer: false,
       timeout: 120_000,
     },
   ],

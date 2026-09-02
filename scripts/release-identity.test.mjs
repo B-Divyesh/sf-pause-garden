@@ -9,6 +9,10 @@ import { verifyRealtimeCandidate } from './verify-realtime-candidate.mjs';
 
 const candidateCommit = '1ab9ba039c16975014a5ac499447cf3e6f3edcc1';
 const staleRoomCommit = 'f1c883faac0d9b3a93df79b7e51cee6bd84ed30f';
+// Verification 8 found this precise mixed release. Keep the observed IDs so a
+// future release-script edit cannot quietly reduce this to an abstract case.
+const verificationEightStaticCommit = 'c24c20d9124569b8499814f45c95a6a5a306dc10';
+const verificationEightRealtimeCommit = '01e3bffd7b44b5d6e808c62dc2b29449db319cb6';
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 const temporaryDirectories = [];
 const servers = [];
@@ -59,6 +63,46 @@ async function serve(routes) {
 }
 
 describe('same-commit release identity', () => {
+  it('rejects Verification 8: static c24c20d with realtime 01e3bff', async () => {
+    const fixture = await candidate();
+    fixture.manifest.sourceCommit = verificationEightStaticCommit;
+    fixture.manifest.indexSha256 = sha256(fixture.index);
+    fixture.manifest.serviceWorkerSha256 = sha256(fixture.serviceWorker);
+    fixture.index = fixture.index.replace(candidateCommit, verificationEightStaticCommit);
+    fixture.serviceWorker = fixture.serviceWorker.replace(candidateCommit, verificationEightStaticCommit);
+    fixture.manifest.indexSha256 = sha256(fixture.index);
+    fixture.manifest.serviceWorkerSha256 = sha256(fixture.serviceWorker);
+    await Promise.all([
+      writeFile(join(fixture.directory, 'index.html'), fixture.index),
+      writeFile(join(fixture.directory, 'sw.js'), fixture.serviceWorker),
+      writeFile(join(fixture.directory, 'build-manifest.json'), JSON.stringify(fixture.manifest)),
+    ]);
+    const staticOrigin = await serve({
+      '/': fixture.index,
+      '/build-manifest.json': fixture.manifest,
+      '/sw.js': fixture.serviceWorker,
+      '/assets/main-BkvH-8yi.js': fixture.script,
+      '/assets/main-Ce1lVhFR.css': fixture.style,
+    });
+    const realtimeOrigin = await serve({
+      '/health': { ok: true, build: verificationEightRealtimeCommit, storage: 'sqlite' },
+    });
+
+    const result = await verifyReleaseIdentity({
+      expectedCommit: verificationEightStaticCommit,
+      candidateDir: fixture.directory,
+      staticOrigin,
+      realtimeOrigin,
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      expectedCommit: verificationEightStaticCommit,
+      health: { ok: true, build: verificationEightRealtimeCommit, storage: 'sqlite' },
+      errors: [`room service build ${verificationEightRealtimeCommit} does not match ${verificationEightStaticCommit}`],
+    });
+  });
+
   it('rejects the exact mixed release where static matches and realtime is stale', async () => {
     const fixture = await candidate();
     const staticOrigin = await serve({

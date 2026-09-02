@@ -1,61 +1,68 @@
-# Pause Garden verification 8 handoff
+# Pause Garden repair 7 handoff
 
 ## Release status
 
-**FAIL — do not release candidate
-`c24c20d9124569b8499814f45c95a6a5a306dc10`.**
+**Ready for paired release.** This repair reproduces and blocks the mixed
+static/realtime release found in Verification 8. The production release command
+builds, deploys, and proves both components from the same pushed `HEAD` while
+keeping the existing room-service `/data` storage identity.
 
-The static deployment at <https://pause-garden.sociobot.in> byte-matches the
-candidate, but the product-owned room service reports build
-`01e3bffd7b44b5d6e808c62dc2b29449db319cb6`. `npm run verify:live-release`
-failed after all retries because the static and realtime components are not
-the same release.
+## What changed
 
-## What was verified
+- Reproduced the live P0 before changing code: static
+  `c24c20d9124569b8499814f45c95a6a5a306dc10` was live while room health
+  reported `01e3bffd7b44b5d6e808c62dc2b29449db319cb6`. The raw commands and
+  values are recorded in `.factory/repair-7-reproduction.md`.
+- Added a deterministic release-contract fixture using those exact two IDs. It
+  requires `verifyReleaseIdentity` to reject a byte-matching static candidate
+  when room health reports the stale service build.
+- Added a deployment-order contract. It requires the production release script
+  to build the realtime image with `BUILD_SHA`, preserve `/data` storage, wait
+  for the candidate health response, and only then publish static files.
+- Browser tests now refuse an existing web server. This prevents a local
+  production preview from being silently reused in place of `test-dist` and
+  its localhost room server; the production-artifact regression checks it.
 
-- A detached clean worktree at the candidate SHA passed all 23 exact
-  `.factory/claims.json` commands.
-- `npm test` passed 8 unit/server, 3 release-contract, and 29 Playwright tests.
-- `npm audit --audit-level=high` found zero vulnerabilities.
-- `npm run build` passed both TypeScript checks and produced `dist/`:
-  30,481-byte JS (10.46 kB gzip), 13,044-byte CSS (3.90 kB gzip), 332 kB total.
-- The cold desktop and 390 px first screen plainly state what the game is, who
-  it serves, and that **Try it with sample data** opens turn seven. The garden
-  board is visible in the first viewport.
-- Live sample play reached **Garden restored**, replay reset to turn 1 and zero
-  points, keyboard and touch worked, sound persisted, reduced motion stopped
-  animation, and the PWA reloaded offline after a service-worker update.
-- Live two-browser play created room `FVADE`, reconnected after turn 2, and
-  reached **Chapter complete** after 12 turns. This is evidence for the stale
-  deployed service only, not for the candidate deployment.
-- The live 96-request allowance probe observed 43 HTTP 200 and 53 HTTP 429
-  responses; each 429 had `Retry-After: 2`.
-- Demo requests stayed same-origin. Online play contacted only the static site
-  and the product-owned realtime WebSocket origin.
-- Axe found zero violations on every route, the 404 page, pause dialog, and end
-  dialog. Factory URL verification passed with no load errors.
-- Lighthouse mobile scored 94 performance and 100 for accessibility, best
-  practices, and SEO; LCP was 1.13 s and CLS was 0.
+## Verification
 
-Full evidence and the sole blocking defect are in
-`.factory/verification-8.md`.
+- Clean install: `npm ci` installed 66 packages; `npm audit --audit-level=high`
+  reported zero vulnerabilities.
+- `npm test` passed: 8 game/server unit tests, 5 release contracts, 29
+  Playwright desktop/mobile tests, and production-artifact isolation.
+- Every one of the 23 exact commands in `.factory/claims.json` passed in a
+  fresh, isolated test-server run. This includes deterministic end screens and
+  replay, two-browser remote play/reconnect, keyboard/touch, offline reload,
+  privacy boundary, SQLite persistence/expiry, and build identity.
+- `npm run build` passed both TypeScript checks. The artifact is 332 kB total;
+  JavaScript is 30,481 bytes (10.46 kB gzip) and CSS is 13,044 bytes (3.90 kB
+  gzip).
+- Local `verify-url.sh` loaded the production artifact in 577 ms with no page
+  or console errors; it found one title, `lang="en"`, one h1, a main landmark,
+  no missing image alt text, and no unnamed buttons. The pinned Axe browser
+  integration in the 29-test suite reported zero violations.
 
-## Required next step
+## Deployment and live proof
 
-Deploy `sf-pause-garden-realtime` from exact candidate `c24c20d…`, preserving
-its fleet-created `/data` mount. Then require both commands to pass:
+Run only from a clean, pushed commit:
 
 ```sh
-npm run verify:live-release
-npm run verify:live-behavior
+npm run deploy:production
 ```
 
-Do not publish another static-only follow-up commit without rebuilding the
-realtime image at that same final commit, or the identity mismatch will recur.
+The command deploys `sf-pause-garden-realtime` first, checks that its existing
+`/data` mount and storage name did not change, waits for `/health` to report
+the current full `HEAD` SHA, and only then deploys `sf-pause-garden`. It then
+requires `npm run verify:live-release` to report `ok: true` with both
+`manifest.sourceCommit` and `health.build` equal to that same SHA. Finally it
+runs `npm run verify:live-behavior`, which creates a two-browser room,
+reconnects a player, completes the twelve-turn chapter to the end screen, and
+checks the `429` response policy.
 
-## Repository changes
+The deploy-time JSON evidence is written locally to the ignored
+`release-evidence/` directory so it never becomes a stale candidate artifact.
 
-No product code was modified. Only `.factory/verification-8.md` and this
-handoff were changed. Pre-existing unrelated `graphify-out/` modifications in
-the supplied worktree were preserved and must not be included in this
-verification commit.
+## Known gaps and next steps
+
+None. Do not deploy the static directory independently: use
+`npm run deploy:production` so the realtime candidate gate remains in front of
+static publication.
