@@ -10,6 +10,18 @@ describe('deterministic garden core', () => {
     expect(hashSeed('FERN-4')).toBe(hashSeed('FERN-4'));
   });
 
+  it('@claim:weather-sequence changes the weather after every action', () => {
+    let game = createGame(['A', 'B'], 'FERN-4', 100);
+    const weather = [weatherFor(game)];
+    game = applyAction(game, 'plant', 0);
+    weather.push(weatherFor(game));
+    game = applyAction(game, 'plant', 1);
+    weather.push(weatherFor(game));
+    game = applyAction(game, 'plant', 2);
+    weather.push(weatherFor(game));
+    expect(weather).toEqual(['Rain', 'Warm light', 'Wind', 'Rain']);
+  });
+
   it('plays a scripted run to a clear end state', () => {
     let game = createGame(['A', 'B'], 'WIN-8', 100);
     game.target = 3;

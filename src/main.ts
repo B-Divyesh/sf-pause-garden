@@ -19,9 +19,6 @@ const ROOM_SESSION_KEY = 'pause-garden:room-session';
 const DEMO_KEY = 'demo:pause-garden:room';
 const SOUND_KEY = 'pause-garden:sound';
 const COMPLETE_KEY = 'pause-garden:chapters-complete';
-const LICENSE_KEY = 'sb_license:pause-garden';
-const VERDICT_KEY = 'pause-garden:license-verdict';
-const API_BASE = 'https://api.sociobot.in/api/v1/products/pause-garden';
 const ROOM_ORIGIN = import.meta.env.VITE_ROOM_API || (location.hostname === '127.0.0.1' || location.hostname === 'localhost'
   ? 'http://127.0.0.1:8787'
   : 'https://pause-garden-realtime.sociobot.in');
@@ -31,8 +28,6 @@ interface RoomSession { code: string; sessionToken: string; playerId: number }
 let game: GameState | null = null;
 let selectedTool: Tool = 'plant';
 let soundEnabled = localStorage.getItem(SOUND_KEY) !== 'off';
-let licensed = false;
-let licenseNotice = '';
 let lastFocus: HTMLElement | null = null;
 let roomSocket: WebSocket | null = null;
 let roomRevision = 0;
@@ -54,7 +49,7 @@ function route(): string {
 }
 
 function isDemo(): boolean {
-  return route() === '/demo' || new URLSearchParams(location.search).get('demo') === '1';
+  return route() === '/demo';
 }
 
 function saveGame(): void {
@@ -100,8 +95,8 @@ function updateMetadata(path: string): void {
     '/': 'Play a 12-turn garden chapter with 2–4 friends. A sleeping player never stops the group.',
     '/demo': 'Try a sample Pause Garden chapter on turn seven with no setup.',
     '/play': 'Create or join a private Pause Garden room for 2–4 remote friends.',
-    '/privacy': 'Read what Pause Garden stores for private rooms and when it checks a license.',
-    '/terms': 'Read the purchase and license terms for Pause Garden.',
+    '/privacy': 'Read what Pause Garden stores for private rooms and when room data is removed.',
+    '/terms': 'Read the play and Host Edition availability terms for Pause Garden.',
     '/404': 'This page does not reach the garden. Return home or open the sample game.',
   };
   const description = descriptions[path] || descriptions['/404'];
@@ -109,6 +104,9 @@ function updateMetadata(path: string): void {
   document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.setAttribute('href', `https://pause-garden.sociobot.in${path}`);
   document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute('content', pageTitle(path));
   document.querySelector<HTMLMetaElement>('meta[property="og:description"]')?.setAttribute('content', description);
+  document.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.setAttribute('content', `https://pause-garden.sociobot.in${path === '/' ? '/' : path}`);
+  document.querySelector<HTMLMetaElement>('meta[name="twitter:title"]')?.setAttribute('content', pageTitle(path));
+  document.querySelector<HTMLMetaElement>('meta[name="twitter:description"]')?.setAttribute('content', description);
 }
 
 function header(path: string): string {
@@ -177,7 +175,7 @@ function landing(): string {
       <section class="section shell" aria-labelledby="how-heading">
         <div class="section-heading">
           <p class="eyebrow">How it works</p>
-          <h2 id="how-heading">Take turns without waiting on anyone</h2>
+          <h2 id="how-heading">Turn handoff and chapter goals</h2>
         </div>
         <ol class="steps">
           <li><h3>Choose one action</h3><p>Plant, water, or tend one bed. Weather changes which action helps most.</p></li>
@@ -188,25 +186,16 @@ function landing(): string {
       <section class="section plain-section">
         <div class="shell boundaries">
           <div><p class="eyebrow">What it does</p><h2>One shared garden room</h2><ul><li>Creates a private five-character room code.</li><li>Syncs each turn across your friends’ browsers.</li><li>Reconnects the room after a refresh.</li></ul></div>
-          <div><p class="eyebrow">What it does not do</p><h2>No pressure to stay online</h2><ul><li>No timers, combat, or daily streaks.</li><li>No account, chat, or public player list.</li><li>No third-party multiplayer service.</li></ul></div>
+          <div><p class="eyebrow">What it does not do</p><h2>Limits and privacy</h2><ul><li>No timers, combat, or daily streaks.</li><li>No account, chat, or public player list.</li><li>Online rooms connect only to Pause Garden’s room server.</li></ul></div>
         </div>
       </section>
       <section class="section shell" id="price">
         <div class="price-layout">
-          <div><p class="eyebrow">Host edition</p><h2>Start as many chapters as you want</h2><p class="muted">The free game includes the demo and one full chapter. Host Edition adds unlimited new chapters and custom seeds.</p><p class="price">$6 <small>one-time purchase</small></p><a class="button" href="${API_BASE}/checkout">Buy Host Edition</a></div>
-          ${licenseBox()}
+          <div><p class="eyebrow">Host edition</p><h2>Host Edition availability</h2><p class="muted">The free game includes the demo and one online chapter. Host Edition is not for sale while checkout is unavailable.</p><button type="button" disabled>Host Edition unavailable</button></div>
+          <div class="license-box"><h3>Purchase status</h3><p class="muted">No payment can be made here. Play the sample or host the included free chapter.</p><p><a href="/terms" data-link>Read the purchase terms</a></p></div>
         </div>
       </section>
     </main>${footer()}`;
-}
-
-function licenseBox(): string {
-  return `<div class="license-box">
-    <h3>${licensed ? 'Host Edition is active' : 'Already bought it?'}</h3>
-    <p class="muted">${licensed ? 'Unlimited chapters and custom seeds are ready.' : 'Paste your license to use Host Edition on this device.'}</p>
-    ${licensed ? '' : `<form id="license-form" class="inline-form"><div class="field"><label for="license">License</label><input id="license" name="license" autocomplete="off" required /></div><button type="submit">Restore purchase</button></form>`}
-    <p id="license-status" class="${licenseNotice.includes('not') ? 'form-error' : 'muted'}" aria-live="polite">${escapeHtml(licenseNotice)}</p>
-  </div>`;
 }
 
 function demoBar(): string {
@@ -219,25 +208,24 @@ function demoBar(): string {
 
 function setupPage(): string {
   const completed = Number(localStorage.getItem(COMPLETE_KEY) || '0');
-  const gated = completed > 0 && !licensed;
+  const gated = completed > 0;
   return `${header('/play')}<main id="main" class="shell setup-page">
     <p class="eyebrow">Private online room</p>
     <h1>${gated ? 'Start another garden chapter' : 'Start a garden chapter together'}</h1>
     <p class="lede">Name 2–4 friends, then share the room code. Each friend joins from their own browser.</p>
     <div class="setup-grid">
-      ${gated ? `<section><div class="notice"><strong>Your free chapter is complete.</strong><p>Host Edition adds unlimited chapters and custom seeds.</p></div><p class="price">$6 <small>one-time purchase</small></p><a class="button" href="${API_BASE}/checkout">Buy Host Edition</a></section>` : `<form id="setup-form" class="setup-form">
+      ${gated ? `<section><div class="notice"><strong>Your free chapter is complete.</strong><p>Host Edition is not for sale while checkout is unavailable.</p></div><button type="button" disabled>Host Edition unavailable</button></section>` : `<form id="setup-form" class="setup-form">
         <div class="name-fields" id="name-fields">
-          <div class="field"><label for="player-1">Player 1 name</label><input id="player-1" name="player" value="Mara" maxlength="18" required /></div>
-          <div class="field"><label for="player-2">Player 2 name</label><input id="player-2" name="player" value="Jules" maxlength="18" required /></div>
+          <div class="field"><label for="player-1">Player 1 name</label><input id="player-1" name="player" value="Mara" maxlength="18" aria-describedby="setup-error" required /></div>
+          <div class="field"><label for="player-2">Player 2 name</label><input id="player-2" name="player" value="Jules" maxlength="18" aria-describedby="setup-error" required /></div>
         </div>
         <div class="setup-actions"><button type="button" class="secondary" id="add-player">Add player</button><button type="button" class="quiet" id="remove-player" disabled>Remove player</button></div>
-        <div class="field"><label for="seed">Garden seed ${licensed ? '' : '(set by the garden)'}</label><input id="seed" name="seed" value="${randomSeed()}" maxlength="16" ${licensed ? '' : 'readonly'} aria-describedby="seed-help" /><small id="seed-help" class="muted">The same seed always creates the same garden and weather.</small></div>
+        <div class="field"><label for="seed">Garden seed (set by the garden)</label><input id="seed" name="seed" value="${randomSeed()}" maxlength="16" readonly aria-describedby="seed-help" /><small id="seed-help" class="muted">The same seed always creates the same garden and weather.</small></div>
         <p class="form-error" id="setup-error" aria-live="polite">${escapeHtml(roomError)}</p>
         <button type="submit">Create online room</button>
       </form>`}
-      <aside class="join-panel"><h2>Join a friend’s room</h2><form id="join-form" class="setup-form"><div class="field"><label for="room-code">Room code</label><input id="room-code" name="code" maxlength="5" autocapitalize="characters" autocomplete="off" required /></div><div class="field"><label for="join-name">Your player name</label><input id="join-name" name="name" maxlength="18" autocomplete="nickname" required /></div><button type="submit">Join online room</button><p class="muted">Use the name your host entered.</p></form></aside>
+      <aside class="join-panel"><h2>Join a friend’s room</h2><form id="join-form" class="setup-form"><div class="field"><label for="room-code">Room code</label><input id="room-code" name="code" maxlength="5" autocapitalize="characters" autocomplete="off" aria-describedby="join-help join-error" required /></div><div class="field"><label for="join-name">Your player name</label><input id="join-name" name="name" maxlength="18" autocomplete="nickname" aria-describedby="join-help join-error" required /></div><button type="submit">Join online room</button><p class="muted" id="join-help">Use the name your host entered.</p><p class="form-error" id="join-error" aria-live="polite">${escapeHtml(roomError)}</p></form></aside>
     </div>
-    <section class="section">${licenseBox()}</section>
   </main>${footer()}`;
 }
 
@@ -306,9 +294,9 @@ function gamePage(demo: boolean): string {
 
 function legalPage(kind: 'privacy' | 'terms'): string {
   const privacy = kind === 'privacy';
-  return `${header(`/${kind}`)}<main id="main" class="shell legal-page"><p class="eyebrow">${privacy ? 'Privacy' : 'Terms'}</p><h1>${privacy ? 'Your garden stays on this device' : 'Play fairly and keep your license'}</h1><div class="legal-copy">
-    ${privacy ? `<p>Pause Garden does not require an account. The browser stores your room code, reconnect token, last room state, sound setting, and license token.</p><h2>What leaves your device</h2><p>Online room names, turns, and garden state go only to the product-owned Pause Garden room service. The service stores rooms for up to 30 inactive days. A license token goes to Sociobot only when you restore or verify a purchase.</p><h2>Your choices</h2><p>Clear this site’s browser storage to remove this browser’s reconnect data. Demo data uses session storage, never enters the online room service, and ends with that browser session.</p><h2>Contact</h2><p>Email <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a> with a privacy question.</p>` : `<p>Pause Garden is a browser game for personal use. You may play the free chapter and demo without an account.</p><h2>Purchase</h2><p>Host Edition costs $6 once. It adds unlimited chapters and custom seeds. Sociobot and Dodo are the merchant of record. A refund revokes the license.</p><h2>License use</h2><p>You may use your license on your own devices. Do not sell or publish the token. Access may stop if a payment is refunded or the token is misused.</p><h2>Game availability</h2><p>Online rooms require a connection and expire after 30 inactive days. Keep your license token somewhere safe.</p><h2>Contact</h2><p>Email <a href="mailto:support@sociobot.in">support@sociobot.in</a> with a purchase question.</p>`}
-    <p>Last updated: September 1, 2026.</p></div></main>${footer()}`;
+  return `${header(`/${kind}`)}<main id="main" class="shell legal-page"><p class="eyebrow">${privacy ? 'Privacy' : 'Terms'}</p><h1>${privacy ? 'How Pause Garden stores your data' : 'Terms for playing Pause Garden'}</h1><div class="legal-copy">
+    ${privacy ? `<p>Pause Garden does not require an account. This browser stores your room code, private reconnect token, last room state, and sound setting.</p><h2>What leaves your device</h2><p>Online room names, turns, and garden state go only to Pause Garden’s room server. The server removes rooms after 30 inactive days.</p><h2>Your choices</h2><p>Clear this site’s browser storage to remove this browser’s reconnect data. Demo data uses separate session storage and never enters the online room server.</p><h2>Contact</h2><p>Email <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a> with a privacy question.</p>` : `<p>Pause Garden is a browser game for personal use. You may play the demo and one online chapter without an account.</p><h2>Host Edition availability</h2><p>Host Edition is not for sale while checkout is unavailable. No payment can be made through this site.</p><h2>Game availability</h2><p>Online rooms need a connection. The room server removes them after 30 inactive days.</p><h2>Contact</h2><p>Email <a href="mailto:support@sociobot.in">support@sociobot.in</a> with a question.</p>`}
+    <p>Last updated: September 2, 2026.</p></div></main>${footer()}`;
 }
 
 function notFound(): string {
@@ -319,17 +307,10 @@ function bindCommon(): void {
   document.querySelectorAll<HTMLAnchorElement>('a[data-link]').forEach((link) => link.addEventListener('click', (event) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
-    navigate(new URL(link.href).pathname);
+    const nextPath = new URL(link.href).pathname;
+    if (route() === '/demo' && nextPath === '/play') sessionStorage.removeItem(DEMO_KEY);
+    navigate(nextPath);
   }));
-  document.querySelector<HTMLFormElement>('#license-form')?.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const token = new FormData(event.currentTarget as HTMLFormElement).get('license')?.toString().trim();
-    if (!token) return;
-    localStorage.setItem(LICENSE_KEY, token);
-    licenseNotice = 'Checking this license…';
-    render(false);
-    await verifyLicense(token, true);
-  });
 }
 
 function roomSocketUrl(): string {
@@ -340,9 +321,16 @@ function roomSocketUrl(): string {
 
 function showRoomError(message: string): void {
   roomError = message;
-  const region = document.querySelector<HTMLElement>('#setup-error');
-  if (region) region.textContent = message;
-  else if (game) render(false);
+  if (game) return render(false);
+  const joinAttempt = document.querySelector<HTMLButtonElement>('#join-form button[type="submit"]')?.disabled;
+  const region = document.querySelector<HTMLElement>(joinAttempt ? '#join-error' : '#setup-error')
+    || document.querySelector<HTMLElement>('#join-error');
+  if (!region) return render(false);
+  region.textContent = message;
+  document.querySelectorAll<HTMLButtonElement>('#setup-form button[type="submit"], #join-form button[type="submit"]').forEach((button) => {
+    button.disabled = false;
+    button.textContent = button.closest('#join-form') ? 'Join online room' : 'Create online room';
+  });
 }
 
 function connectRoom(message: Record<string, unknown>, reconnect = false): void {
@@ -415,7 +403,7 @@ function bindSetup(): void {
   add?.addEventListener('click', () => {
     const count = fields?.querySelectorAll('input').length || 0;
     if (!fields || count >= 4) return;
-    fields.insertAdjacentHTML('beforeend', `<div class="field"><label for="player-${count + 1}">Player ${count + 1} name</label><input id="player-${count + 1}" name="player" value="Player ${count + 1}" maxlength="18" required /></div>`);
+    fields.insertAdjacentHTML('beforeend', `<div class="field"><label for="player-${count + 1}">Player ${count + 1} name</label><input id="player-${count + 1}" name="player" value="Player ${count + 1}" maxlength="18" aria-describedby="setup-error" required /></div>`);
     syncButtons();
   });
   remove?.addEventListener('click', () => {
@@ -533,6 +521,7 @@ function bindGame(): void {
     selectedTool = 'tend';
     saveGame();
     render(false);
+    announce('Demo reset to turn seven.');
   });
   const board = document.querySelector<HTMLElement>('.garden-board');
   board?.addEventListener('keydown', (event) => {
@@ -610,32 +599,11 @@ function playChime(): void {
   } catch { /* Audio is optional. */ }
 }
 
-async function verifyLicense(token: string, force = false): Promise<void> {
-  let cached: { valid: boolean; checked: number } | null = null;
-  try { cached = JSON.parse(localStorage.getItem(VERDICT_KEY) || 'null'); } catch { cached = null; }
-  if (cached?.valid) licensed = true;
-  if (!force && cached && Date.now() - cached.checked < 86_400_000) return;
-  try {
-    const response = await fetch(`${API_BASE}/verify?license=${encodeURIComponent(token)}`);
-    const result = await response.json() as { valid: boolean; reason: string };
-    licensed = result.valid;
-    localStorage.setItem(VERDICT_KEY, JSON.stringify({ valid: result.valid, checked: Date.now() }));
-    licenseNotice = result.valid ? 'License restored. Host Edition is active.' : 'This license is not active. Check the token or buy Host Edition.';
-  } catch {
-    licenseNotice = licensed ? 'Using the last valid license check.' : 'License check needs a connection. Try again when online.';
-  }
-  render(false);
-}
-
-function takeLicenseFromUrl(): string | null {
+function normalizeDemoEntry(): void {
   const params = new URLSearchParams(location.search);
-  const token = params.get('license');
-  if (!token) return localStorage.getItem(LICENSE_KEY);
-  localStorage.setItem(LICENSE_KEY, token);
-  params.delete('license');
-  const query = params.toString();
-  history.replaceState({}, '', `${location.pathname}${query ? `?${query}` : ''}${location.hash}`);
-  return token;
+  if ((location.pathname === '/' || location.pathname === '') && params.get('demo') === '1') {
+    history.replaceState({}, '', '/demo');
+  }
 }
 
 function startMotes(): void {
@@ -675,8 +643,7 @@ addEventListener('popstate', () => { game = null; render(true); if (route() === 
 addEventListener('online', () => { if (route() === '/play') connectSavedRoom(); else render(false); });
 addEventListener('offline', () => { connectionState = 'offline'; render(false); });
 
-const license = takeLicenseFromUrl();
-if (license) void verifyLicense(license);
+normalizeDemoEntry();
 render(false);
 if (route() === '/play') connectSavedRoom();
 startMotes();

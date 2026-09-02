@@ -1,9 +1,9 @@
 {
-  "navigationFallback": {
-    "rewrite": "/index.html",
-    "exclude": ["/assets/*", "/art/*", "/*.svg", "/*.png", "/*.xml", "/*.txt", "/*.js"]
-  },
   "routes": [
+    { "route": "/demo", "rewrite": "/index.html" },
+    { "route": "/play", "rewrite": "/index.html" },
+    { "route": "/privacy", "rewrite": "/index.html" },
+    { "route": "/terms", "rewrite": "/index.html" },
     {
       "route": "/assets/*",
       "headers": {

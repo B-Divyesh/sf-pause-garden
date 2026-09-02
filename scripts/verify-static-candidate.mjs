@@ -1,6 +1,5 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
 
 const root = new URL('..', import.meta.url);
 const text = async (path) => readFile(new URL(path, root), 'utf8');
@@ -11,33 +10,31 @@ const fail = (message) => {
 };
 
 const roomOrigin = 'https://pause-garden-realtime.sociobot.in';
-const expectedAssets = {
-  'main-CNwY5fXg.js': '35cbd0ba4e244c9efa6066fd04eb842cc99b111278227ab127f2fba1ad3201c6',
-  'main-DKua9P12.css': '8f0c21e45e8abb614bd9ee8d9f1ba8e545610113b81c186c08559530c283f10c',
-};
-const config = JSON.parse(await text('public/staticwebapp.config.json'));
-const expectedFallback = {
-  rewrite: '/index.html',
-  exclude: ['/assets/*', '/art/*', '/*.svg', '/*.png', '/*.xml', '/*.txt', '/*.js'],
-};
-
-if (JSON.stringify(config.navigationFallback) !== JSON.stringify(expectedFallback)) {
-  fail('unknown routes must use the exact candidate SPA navigation fallback');
+const validRoutes = ['/demo', '/play', '/privacy', '/terms'];
+const config = JSON.parse(await text('dist/staticwebapp.config.json'));
+const sourceConfig = JSON.parse(await text('public/staticwebapp.config.json'));
+if (JSON.stringify(config) !== JSON.stringify(sourceConfig)) fail('deployed configuration differs from its source');
+if (config.navigationFallback) fail('navigationFallback would turn unknown paths into HTTP 200 responses');
+for (const route of validRoutes) {
+  const rule = config.routes?.find((item) => item.route === route);
+  if (rule?.rewrite !== '/index.html' || 'statusCode' in rule) fail(`${route} needs a status-preserving index rewrite`);
 }
-if (config.routes?.some((route) => ['/demo', '/play', '/privacy', '/terms'].includes(route.route))) {
-  fail('candidate routes must be served by navigationFallback, not per-route rewrites');
-}
+if (config.responseOverrides?.['404']?.rewrite !== '/404.html') fail('unknown paths need the designed 404 document');
 
 const index = await text('dist/index.html');
-for (const [name, expectedHash] of Object.entries(expectedAssets)) {
-  if (!index.includes(`/assets/${name}`)) fail(`index.html does not reference ${name}`);
-  const actualHash = sha256(await readFile(join(new URL('.', root).pathname, 'dist', 'assets', name)));
-  if (actualHash !== expectedHash) fail(`${name} hash was ${actualHash}, expected ${expectedHash}`);
+const notFound = await text('dist/404.html');
+if (!notFound.includes('Page not found — Pause Garden') || !notFound.includes('name="robots" content="noindex"')) {
+  fail('404.html is not the titled, noindex error document');
 }
-const main = await text('dist/assets/main-CNwY5fXg.js');
-if (!main.includes(roomOrigin)) fail(`built client does not contain production room origin ${roomOrigin}`);
-const sourceConfig = await text('public/staticwebapp.config.json');
-const deployedConfig = await text('dist/staticwebapp.config.json');
-if (deployedConfig !== sourceConfig) fail('dist staticwebapp.config.json differs from the candidate configuration');
+const manifest = JSON.parse(await text('dist/build-manifest.json'));
+const assetEntries = Object.entries(manifest.assets || {});
+if (!assetEntries.length) fail('build manifest has no hashed assets');
+for (const [asset, expected] of assetEntries) {
+  if (!index.includes(asset)) fail(`index.html does not reference ${asset}`);
+  const body = await readFile(new URL(`dist${asset}`, root));
+  if (sha256(body) !== expected) fail(`${asset} does not match its built-file checksum`);
+  if (asset.endsWith('.js') && !body.includes(roomOrigin)) fail(`${asset} does not contain the production room origin`);
+  if (asset.endsWith('.js') && body.includes('http://127.0.0.1:8787')) fail(`${asset} contains the local room origin`);
+}
 
-if (!process.exitCode) console.log('Static candidate contract passed: production assets, room origin, and route fallback are byte-identical.');
+if (!process.exitCode) console.log('Static candidate contract passed: assets, production room origin, app routes, and true 404 policy are valid.');

@@ -17,13 +17,51 @@ test('landing and demo have no serious accessibility findings', async ({ page })
 test('routes have one h1 and no console errors', async ({ page }) => {
   const errors: string[] = [];
   page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
-  for (const path of ['/', '/demo', '/play', '/privacy', '/terms', '/missing-page']) {
+  for (const path of ['/', '/demo', '/play', '/privacy', '/terms']) {
     await page.goto(path);
     await expect(page.locator('main')).toHaveCount(1);
     await expect(page.locator('h1')).toHaveCount(1);
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   }
   expect(errors).toEqual([]);
+  await page.goto('/missing-page');
+  await expect(page.locator('main')).toHaveCount(1);
+  await expect(page.locator('h1')).toHaveCount(1);
+});
+
+test('routes set unique titles, metadata, focus, and HTTP status', async ({ page }) => {
+  const routes = [
+    ['/', 'Pause Garden — Restore a garden with friends'],
+    ['/demo', 'Demo — Pause Garden'],
+    ['/play', 'Play — Pause Garden'],
+    ['/privacy', 'Privacy — Pause Garden'],
+    ['/terms', 'Terms — Pause Garden'],
+  ] as const;
+  for (const [path, title] of routes) {
+    const response = await page.goto(path);
+    expect(response?.status(), path).toBe(200);
+    await expect(page).toHaveTitle(title);
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /\S+/);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `https://pause-garden.sociobot.in${path}`);
+  }
+  const missing = await page.goto('/missing-page');
+  expect(missing?.status()).toBe(404);
+  await expect(page).toHaveTitle('Page not found — Pause Garden');
+
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Demo', exact: true }).click();
+  await expect(page.locator('h1')).toBeFocused();
+  await page.goBack();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.locator('h1')).toBeFocused();
+});
+
+test('every local page link resolves and legal links remain visible', async ({ page, request }) => {
+  await page.goto('/');
+  const paths = await page.locator('a[href^="/"]').evaluateAll((links) => [...new Set(links.map((link) => (link as HTMLAnchorElement).pathname))]);
+  for (const path of paths) expect((await request.get(path)).status(), path).toBe(200);
+  await expect(page.getByRole('link', { name: 'Privacy' }).last()).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Terms', exact: true })).toBeVisible();
 });
 
 test('@mobile game fits a 390px viewport', async ({ page }) => {

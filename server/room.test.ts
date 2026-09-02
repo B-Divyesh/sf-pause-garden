@@ -1,12 +1,14 @@
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import WebSocket from 'ws';
 import { createRoomServer } from './index.js';
+import { RoomStore } from './store.js';
 
 const tempDirs: string[] = [];
 afterEach(() => {
+  vi.useRealTimers();
   for (const path of tempDirs.splice(0)) rmSync(path, { recursive: true, force: true });
 });
 
@@ -21,7 +23,7 @@ async function openSocket(port: number): Promise<WebSocket> {
 }
 
 describe('product-owned room service', () => {
-  it('persists a synchronized two-browser room and reconnect token in SQLite', async () => {
+  it('@claim:room-storage-sqlite persists synchronized room state and a reconnect token in SQLite', async () => {
     const directory = mkdtempSync(join(tmpdir(), 'pause-garden-room-'));
     tempDirs.push(directory);
     const database = join(directory, 'rooms.sqlite');
@@ -57,6 +59,29 @@ describe('product-owned room service', () => {
     const restored = createRoomServer(database);
     expect(restored.store.get(created.state.code)?.state.turn).toBe(1);
     await restored.close();
+  });
+
+  it('@claim:room-expiry removes a room after 30 inactive days', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-01-01T00:00:00Z'));
+    const directory = mkdtempSync(join(tmpdir(), 'pause-garden-expiry-'));
+    tempDirs.push(directory);
+    const database = join(directory, 'rooms.sqlite');
+    const first = new RoomStore(database);
+    first.create({
+      version: 1, code: 'OLD30', seed: 'MOSS-27', rng: 1, turn: 0, maxTurns: 12,
+      score: 0, target: 14, caredCount: 0, visitorTarget: 3, status: 'playing',
+      players: [{ id: 0, name: 'A', away: false, queuedTool: 'plant' }, { id: 1, name: 'B', away: false, queuedTool: 'plant' }],
+      beds: Array.from({ length: 16 }, () => ({ stage: 'empty' as const, family: 'fern' as const, cared: false })),
+      history: [], startedAt: Date.now(),
+    });
+    first.close();
+
+    vi.setSystemTime(new Date('2026-02-01T00:00:01Z'));
+    const second = new RoomStore(database);
+    second.deleteOlderThan(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    expect(second.get('OLD30')).toBeNull();
+    second.close();
   });
 
   it('returns 429 with Retry-After when a client exceeds the response policy', async () => {

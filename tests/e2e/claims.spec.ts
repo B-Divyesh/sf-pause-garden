@@ -93,16 +93,25 @@ test('@claim:privacy-same-origin demo sends no cross-origin requests', async ({ 
   expect(crossOrigin).toEqual([]);
 });
 
-test('@claim:keyboard-controls arrow keys move between beds and Enter acts', async ({ page }) => {
-  await page.goto('/demo');
-  const firstBed = page.locator('[data-bed="0"]');
-  await firstBed.focus();
-  await page.keyboard.press('ArrowRight');
-  await expect(page.locator('[data-bed="1"]')).toBeFocused();
-  await page.keyboard.press('ArrowRight');
-  await expect(page.locator('[data-bed="2"]')).toBeFocused();
-  await page.keyboard.press('Enter');
-  await expect(page.getByRole('heading', { name: 'Garden restored' })).toBeVisible();
+test('@claim:keyboard-controls keyboard and touch can complete the sample', async ({ browser }) => {
+  const keyboardContext = await browser.newContext();
+  const keyboardPage = await keyboardContext.newPage();
+  await keyboardPage.goto('/demo');
+  await keyboardPage.locator('[data-bed="0"]').focus();
+  await keyboardPage.keyboard.press('ArrowRight');
+  await expect(keyboardPage.locator('[data-bed="1"]')).toBeFocused();
+  await keyboardPage.keyboard.press('ArrowRight');
+  await expect(keyboardPage.locator('[data-bed="2"]')).toBeFocused();
+  await keyboardPage.keyboard.press('Enter');
+  await expect(keyboardPage.getByRole('heading', { name: 'Garden restored' })).toBeVisible();
+
+  const touchContext = await browser.newContext({ hasTouch: true, viewport: { width: 390, height: 844 } });
+  const touchPage = await touchContext.newPage();
+  await touchPage.goto('/demo');
+  await touchPage.getByRole('button', { name: /Bed 3: growing fern.*Use Tend plant/ }).tap();
+  await expect(touchPage.getByRole('heading', { name: 'Garden restored' })).toBeVisible();
+  await keyboardContext.close();
+  await touchContext.close();
 });
 
 test('@claim:two-to-four-players setup creates a four-player room', async ({ page }) => {
@@ -114,18 +123,42 @@ test('@claim:two-to-four-players setup creates a four-player room', async ({ pag
   await expect(page.getByText('1 of 12', { exact: true })).toBeVisible();
 });
 
-test('@claim:paid-host-edition a cached valid license enables custom seeds', async ({ page }) => {
-  await page.addInitScript(() => {
-    localStorage.setItem('sb_license:pause-garden', 'test-license');
-    localStorage.setItem('pause-garden:license-verdict', JSON.stringify({ valid: true, checked: Date.now() }));
-    localStorage.setItem('pause-garden:chapters-complete', '4');
-  });
+test('@claim:checkout-unavailable the unavailable paid tier has no checkout action', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('.price')).toContainText('$6');
-  await expect(page.getByRole('link', { name: 'Buy Host Edition' })).toHaveAttribute('href', 'https://api.sociobot.in/api/v1/products/pause-garden/checkout');
+  await expect(page.getByRole('button', { name: 'Host Edition unavailable' })).toBeDisabled();
+  await expect(page.locator(`a[href*="/checkout"]`)).toHaveCount(0);
+  await page.evaluate(() => localStorage.setItem('pause-garden:chapters-complete', '1'));
   await page.goto('/play');
-  await expect(page.getByLabel('Garden seed')).toBeEditable();
-  await expect(page.getByText('Host Edition is active')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Host Edition unavailable' })).toBeDisabled();
+  await expect(page.locator(`a[href*="/checkout"]`)).toHaveCount(0);
+});
+
+test('@claim:demo-isolation query demo uses separate storage and discards it on exit', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('pause-garden:room', 'real-room-sentinel'));
+  await page.goto('/?demo=1');
+  await expect(page).toHaveURL(/\/demo$/);
+  await expect(page.getByText('Demo — sample data, nothing is saved')).toBeVisible();
+  await expect(page.getByText('7 of 12', { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => ({
+    demo: sessionStorage.getItem('demo:pause-garden:room'),
+    real: localStorage.getItem('pause-garden:room'),
+  }))).toEqual({ demo: expect.any(String), real: 'real-room-sentinel' });
+  await page.getByRole('link', { name: 'Start for real' }).click();
+  await expect(page).toHaveURL(/\/play$/);
+  expect(await page.evaluate(() => ({
+    demo: sessionStorage.getItem('demo:pause-garden:room'),
+    real: localStorage.getItem('pause-garden:room'),
+  }))).toEqual({ demo: null, real: 'real-room-sentinel' });
+});
+
+test('@claim:room-service-boundary online play connects only to the configured room server', async ({ page }) => {
+  const destinations = new Set<string>();
+  page.on('request', (request) => destinations.add(new URL(request.url()).origin));
+  page.on('websocket', (socket) => destinations.add(new URL(socket.url()).origin));
+  await page.goto('/play');
+  await page.getByRole('button', { name: 'Create online room' }).click();
+  await expect(page.getByText('Room synced')).toBeVisible();
+  expect([...destinations].sort()).toEqual(['http://127.0.0.1:4173', 'ws://127.0.0.1:8787']);
 });
 
 test('@claim:free-chapter a visitor can create the free room without an account', async ({ page }) => {

@@ -1,10 +1,15 @@
 # Landing page copy audit
 
-Audited September 1, 2026. The longest sentence has 16 words. No sentence
-exceeds 22 words. No banned term is present.
+Audited September 2, 2026. Every first-screen and landing-page string is below
+the 22-word limit. No banned marketing word is present.
 
 | Copy | Words | Result |
 | --- | ---: | --- |
+| Skip to game | 3 | Pass |
+| Pause Garden | 2 | Pass |
+| Demo | 1 | Pass |
+| Play | 1 | Pass |
+| Privacy | 1 | Pass |
 | A 12-turn game for 2–4 players | 6 | Pass |
 | Restore a garden, even when friends pause | 7 | Pass |
 | For friends with interrupted evenings who still want each turn to matter. | 11 | Pass |
@@ -14,10 +19,10 @@ exceeds 22 words. No banned term is present.
 | Keyboard and touch controls | 4 | Pass |
 | Private room code, no account | 5 | Pass |
 | One full chapter is free | 5 | Pass |
-| Room MOSS. | 2 | Pass |
-| Turn 7 of 12. | 4 | Pass |
+| Room MOSS. Turn 7 of 12. | 6 | Pass |
 | Jules is sleeping. | 3 | Pass |
-| Take turns without waiting on anyone | 6 | Pass |
+| How it works | 3 | Pass |
+| Turn handoff and chapter goals | 5 | Pass |
 | Choose one action | 3 | Pass |
 | Plant, water, or tend one bed. | 6 | Pass |
 | Weather changes which action helps most. | 6 | Pass |
@@ -26,26 +31,31 @@ exceeds 22 words. No banned term is present.
 | Any present player can place it. | 6 | Pass |
 | Meet both goals | 3 | Pass |
 | Restore enough blooms and finish the visitor request within 12 turns. | 10 | Pass |
+| What it does | 4 | Pass |
 | One shared garden room | 4 | Pass |
 | Creates a private five-character room code. | 6 | Pass |
 | Syncs each turn across your friends’ browsers. | 7 | Pass |
 | Reconnects the room after a refresh. | 6 | Pass |
-| No pressure to stay online | 5 | Pass |
+| What it does not do | 5 | Pass |
+| Limits and privacy | 3 | Pass |
 | No timers, combat, or daily streaks. | 6 | Pass |
 | No account, chat, or public player list. | 7 | Pass |
-| No third-party multiplayer service. | 4 | Pass |
-| Start as many chapters as you want | 7 | Pass |
-| The free game includes the demo and one full chapter. | 10 | Pass |
-| Host Edition adds unlimited new chapters and custom seeds. | 9 | Pass |
-| $6 one-time purchase | 3 | Pass |
-| Buy Host Edition | 3 | Pass |
-| Already bought it? | 3 | Pass |
-| Paste your license to use Host Edition on this device. | 10 | Pass |
-| Restore purchase | 2 | Pass |
+| Online rooms connect only to Pause Garden’s room server. | 9 | Pass |
+| Host edition | 2 | Pass |
+| Host Edition availability | 3 | Pass |
+| The free game includes the demo and one online chapter. | 10 | Pass |
+| Host Edition is not for sale while checkout is unavailable. | 10 | Pass |
+| Host Edition unavailable | 3 | Pass |
+| Purchase status | 2 | Pass |
+| No payment can be made here. | 6 | Pass |
+| Play the sample or host the included free chapter. | 9 | Pass |
+| Read the purchase terms | 4 | Pass |
 | Restore a garden with 2–4 friends. | 6 | Pass |
 | Original generated scenery. | 3 | Pass |
 | Room data goes only to Pause Garden. | 7 | Pass |
 | Version 1.1.0. | 2 | Pass |
+| Terms | 1 | Pass |
+| Built by Param Factory | 4 | Pass |
 
 ## Terminology
 
@@ -58,4 +68,4 @@ exceeds 22 words. No banned term is present.
 | One placed move | token |
 | Board square | bed |
 | Deterministic run identifier | seed |
-| Paid license | Host Edition |
+| Unavailable paid option | Host Edition |

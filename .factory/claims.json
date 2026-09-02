@@ -1,107 +1,22 @@
 [
-  {
-    "id": "chapter-complete",
-    "claim": "A sample chapter reaches a clear end summary.",
-    "where": "demo and README",
-    "test": "npm test -- --grep @claim:chapter-complete",
-    "sandbox": "fresh browser context at /demo; play the valid tend token; assert the garden-restored summary and score"
-  },
-  {
-    "id": "restart-reset",
-    "claim": "A finished chapter can restart from turn one.",
-    "where": "end summary and README",
-    "test": "npm test -- --grep @claim:restart-reset",
-    "sandbox": "finish the sample chapter; replay the seed; assert turn one and zero points"
-  },
-  {
-    "id": "sleeping-handoff",
-    "claim": "Any present player can place a sleeping player's queued token.",
-    "where": "landing, game, and README",
-    "test": "npm test -- --grep @claim:sleeping-handoff",
-    "sandbox": "sample room; mark the current player sleeping; place their valid queued token; assert the group action log"
-  },
-  {
-    "id": "remote-room-play",
-    "claim": "Two remote browsers can join one room, alternate turns, and reach the same end screen.",
-    "where": "landing, game, privacy, and README",
-    "test": "npm test -- --grep @claim:remote-room-play",
-    "sandbox": "two fresh browser contexts; create and join by code and name; alternate 12 deterministic Plant actions; assert both show the same end summary"
-  },
-  {
-    "id": "remote-reconnect",
-    "claim": "A player reconnects to the synchronized room after a refresh.",
-    "where": "landing, game, privacy, and README",
-    "test": "npm test -- --grep @claim:remote-reconnect",
-    "sandbox": "two fresh browser contexts in one room; play two turns; reload the second browser; assert its reconnect token restores turn three"
-  },
-  {
-    "id": "settings-persist",
-    "claim": "The sound setting persists.",
-    "where": "game and README",
-    "test": "npm test -- --grep @claim:settings-persist",
-    "sandbox": "sample room; switch sound off; reload; assert it remains off"
-  },
-  {
-    "id": "offline-reload",
-    "claim": "The visited demo reloads offline.",
-    "where": "README",
-    "test": "npm test -- --grep @claim:offline-reload",
-    "sandbox": "own fresh browser context; visit /demo; await service worker; set offline; reload; assert game and offline state"
-  },
-  {
-    "id": "privacy-same-origin",
-    "claim": "Demo play sends no player data away from the site.",
-    "where": "footer, privacy, and README",
-    "test": "npm test -- --grep @claim:privacy-same-origin",
-    "sandbox": "fresh demo; record every request through chapter completion; assert every request is same-origin"
-  },
-  {
-    "id": "keyboard-controls",
-    "claim": "The game supports keyboard-only play.",
-    "where": "landing, setup, and README",
-    "test": "npm test -- --grep @claim:keyboard-controls",
-    "sandbox": "fresh demo; move across the grid using ArrowRight and place the winning token with Enter"
-  },
-  {
-    "id": "two-to-four-players",
-    "claim": "An online room supports two to four players and lasts 12 turns.",
-    "where": "landing, setup, footer, and README",
-    "test": "npm test -- --grep @claim:two-to-four-players",
-    "sandbox": "fresh real setup; add two players; create the room; assert four player rows"
-  },
-  {
-    "id": "paid-host-edition",
-    "claim": "A valid Host Edition license enables custom seeds and unlimited chapter setup.",
-    "where": "pricing, setup, terms, and README",
-    "test": "npm test -- --grep @claim:paid-host-edition",
-    "sandbox": "fresh context with a current cached valid verdict; open setup; assert Host Edition and editable seed"
-  },
-  {
-    "id": "seed-determinism",
-    "claim": "The same seed creates the same beds and weather.",
-    "where": "setup and README",
-    "test": "npm run test:unit -- -t @claim:seed-determinism",
-    "sandbox": "construct two games with the same seed and compare their beds and first weather"
-  },
-  {
-    "id": "rendering-rate",
-    "claim": "The scene animation has median frame pacing of at least 55 frames per second in the test browser.",
-    "where": "README and handoff",
-    "test": "npm test -- --grep @claim:rendering-rate",
-    "sandbox": "fresh desktop Chromium demo; sample 90 requestAnimationFrame intervals; discard warmup frames; require median pacing of at least 55 fps"
-  },
-  {
-    "id": "free-chapter",
-    "claim": "A visitor can create the free chapter without an account.",
-    "where": "landing, setup, and README",
-    "test": "npm test -- --grep @claim:free-chapter",
-    "sandbox": "fresh browser context without a license; open setup; create a room; assert turn one and the garden board"
-  },
-  {
-    "id": "calm-private-rules",
-    "claim": "The game has no timer, account, chat, or public player list.",
-    "where": "landing and README",
-    "test": "npm test -- --grep @claim:calm-private-rules",
-    "sandbox": "fresh demo; assert a turn count and no email, password, or chat controls"
-  }
+  {"id":"chapter-complete","claim":"A sample chapter reaches a clear end summary.","where":"demo and README","test":"npm test -- --grep @claim:chapter-complete","sandbox":"fresh /demo; play the valid tend token; assert the garden-restored summary and score"},
+  {"id":"restart-reset","claim":"A finished chapter can restart from turn one.","where":"end summary and README","test":"npm test -- --grep @claim:restart-reset","sandbox":"finish the sample; replay the seed; assert turn one and zero points"},
+  {"id":"sleeping-handoff","claim":"Any present player can place a sleeping player's queued token.","where":"landing, game, and README","test":"npm test -- --grep @claim:sleeping-handoff","sandbox":"sample room; mark the current player sleeping; place the queued token; assert the group action log"},
+  {"id":"remote-room-play","claim":"Two remote browsers can join one room, alternate turns, and reach the same end screen.","where":"landing, game, privacy, and README","test":"npm test -- --grep @claim:remote-room-play","sandbox":"two fresh contexts; create and join by code and name; alternate 12 actions; assert both show the same end summary"},
+  {"id":"remote-reconnect","claim":"A player reconnects to the synchronized room after a refresh.","where":"landing, game, privacy, and README","test":"npm test -- --grep @claim:remote-reconnect","sandbox":"two fresh contexts in one room; play two turns; reload the second browser; assert its private token restores turn three"},
+  {"id":"settings-persist","claim":"The sound setting persists.","where":"game and README","test":"npm test -- --grep @claim:settings-persist","sandbox":"sample room; switch sound off; reload; assert it remains off"},
+  {"id":"offline-reload","claim":"The visited demo reloads offline.","where":"README","test":"npm test -- --grep @claim:offline-reload","sandbox":"own fresh context; visit /demo; await service worker; set offline; reload; assert game and offline state"},
+  {"id":"privacy-same-origin","claim":"Demo play sends no player data away from the site.","where":"footer, privacy, and README","test":"npm test -- --grep @claim:privacy-same-origin","sandbox":"fresh demo; record every request through completion; assert every request is same-origin"},
+  {"id":"keyboard-controls","claim":"The game supports keyboard and touch play.","where":"landing, setup, and README","test":"npm test -- --grep @claim:keyboard-controls","sandbox":"one fresh keyboard context and one 390 px touch context; complete the sample with each input method"},
+  {"id":"two-to-four-players","claim":"An online room supports two to four players and lasts 12 turns.","where":"landing, setup, footer, and README","test":"npm test -- --grep @claim:two-to-four-players","sandbox":"fresh setup; add two players; create the room; assert four player rows and 12-turn status"},
+  {"id":"seed-determinism","claim":"The same seed creates the same beds and weather.","where":"setup and README","test":"npm run test:unit -- -t @claim:seed-determinism","sandbox":"construct two games with the same seed and compare their beds and first weather"},
+  {"id":"weather-sequence","claim":"Weather changes after each action.","where":"landing and README","test":"npm run test:unit -- -t @claim:weather-sequence","sandbox":"play three valid actions in a deterministic game and compare the weather for all four turns"},
+  {"id":"rendering-rate","claim":"The scene animation has median frame pacing of at least 55 frames per second in the test browser.","where":"README and handoff","test":"npm test -- --grep @claim:rendering-rate","sandbox":"fresh desktop Chromium demo; sample 90 animation intervals; discard warmup frames; require median pacing of at least 55 fps"},
+  {"id":"free-chapter","claim":"A visitor can create one free online chapter without an account.","where":"landing, setup, terms, and README","test":"npm test -- --grep @claim:free-chapter","sandbox":"fresh context; create an online room without a license or account; assert turn one and the board"},
+  {"id":"calm-private-rules","claim":"The game has no timer, account, chat, or public player list.","where":"landing and README","test":"npm test -- --grep @claim:calm-private-rules","sandbox":"fresh demo; assert a turn count and no email, password, or chat controls"},
+  {"id":"demo-isolation","claim":"The demo uses separate session storage and discards its state when starting for real.","where":"demo banner, demo guide, privacy, and README","test":"npm test -- --grep @claim:demo-isolation","sandbox":"seed a real-data sentinel; enter through /?demo=1; assert demo storage; leave and assert demo state is removed while the sentinel remains"},
+  {"id":"room-service-boundary","claim":"Online rooms connect only to Pause Garden's configured room server.","where":"landing, footer, privacy, and README","test":"npm test -- --grep @claim:room-service-boundary","sandbox":"record page and WebSocket destinations while creating a room; assert only the static origin and configured room origin occur"},
+  {"id":"room-storage-sqlite","claim":"The room server synchronizes turns and keeps room state in SQLite.","where":"README","test":"npm run test:unit -- -t @claim:room-storage-sqlite","sandbox":"two clients share a turn; restart over the same temporary SQLite file; assert the turn remains"},
+  {"id":"room-expiry","claim":"The room server removes rooms after 30 inactive days.","where":"privacy, terms, and README","test":"npm run test:unit -- -t @claim:room-expiry","sandbox":"create a room at a fixed time; advance 30 days and one second; run cleanup; assert the room is gone"},
+  {"id":"checkout-unavailable","claim":"Host Edition is not for sale while checkout is unavailable.","where":"landing, setup, terms, and README","test":"npm test -- --grep @claim:checkout-unavailable","sandbox":"open landing and completed-free-chapter setup; assert the unavailable control is disabled and no checkout link exists"}
 ]

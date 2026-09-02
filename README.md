@@ -3,16 +3,21 @@
 Restore a garden with 2–4 friends, even when someone steps away.
 
 Pause Garden is a 12-turn online browser game for 2–4 remote friends. Players
-join a private room by code and take one turn at a time. Weather changes each
-action. If a player leaves, the group can place that player’s queued token.
+join a private room by code and take one turn at a time. Weather changes after
+each action. A present player can place a sleeping player’s queued token.
+
+Each chapter has 12 turns. The goal is to earn enough bloom points and care for
+three beds before the last turn.
 
 ## Try the sample game
 
-Open `/demo` or <https://pause-garden.sociobot.in/demo>. The sample starts on
-turn seven with one player sleeping. Tend bed three to complete both goals.
+Open `/?demo=1`, `/demo`, or <https://pause-garden.sociobot.in/demo>. The sample
+starts on turn seven with one player sleeping. Tend bed three to complete both
+goals.
 
 Demo state uses the `demo:pause-garden:room` session storage key. It never
-reads or writes a real room. Use **Reset demo** to restore the sample.
+reads or changes a real room. **Reset demo** restores the sample. **Start for
+real** discards the sample state.
 
 ## Play
 
@@ -22,16 +27,14 @@ reads or writes a real room. Use **Reset demo** to restore the sample.
 4. Choose Plant, Water, or Tend, then select a valid bed.
 5. Reach both goals within 12 turns.
 
-The game supports pointer, touch, and keyboard-only play. The product-owned
-room service synchronizes turns and stores room state in SQLite. An opaque
-token reconnects a player after refresh. The visited demo reloads offline and
-never sends sample state to the room service.
+The game supports touch and keyboard play. The Pause Garden room server syncs
+turns and keeps room state in SQLite. A private browser token lets a player
+return after refreshing. The visited demo reloads offline.
 
-## Host Edition
+## Host Edition availability
 
-The demo and one full chapter are free. Host Edition costs $6 once. It adds
-unlimited new chapters and custom seeds. Purchases use the Sociobot hosted
-checkout. The app stores the license locally.
+The demo and one online chapter are free. Host Edition is not for sale while
+checkout is unavailable. The page contains no payment link.
 
 ## Develop
 
@@ -44,15 +47,14 @@ npm run dev:rooms
 npm run dev
 ```
 
-The production build command is exactly:
+Build the production static files with:
 
 ```sh
 npm run build:production
 ```
 
-It creates `dist/` with `index.html` at its root and embeds the production
-Pause Garden room-service origin. `npm run build` is available for local tools
-that supply their own room-service origin.
+This creates `dist/` and uses the production Pause Garden room-server address.
+`npm run build` accepts a local room-server address from the test runner.
 
 ## Verify
 
@@ -62,28 +64,29 @@ npm run build:production
 node scripts/verify-static-candidate.mjs
 ```
 
-The suite covers deterministic game rules, two-browser join/play/end sync,
-SQLite recovery, browser reconnect, replay, sleeping handoff, sound persistence,
-keyboard control, 390 px layout, offline demo reload, privacy requests, rate
-limits, license state, and accessibility. The animation test measures at least
-55 fps from median frame pacing over 90 frames.
+The suite checks game rules, remote play, reconnect, accessibility, and
+privacy. See `.factory/claims.json` for every claim check.
+
+The animation check samples 90 frames. Its median pacing must reach 55 frames
+per second in the test browser.
 
 ## Privacy
 
-Online room names and garden state go only to the product-owned Pause Garden
-room service. Rooms expire after 30 inactive days. Demo play sends no player
-data away from the static site. License verification sends only the saved
-license token to `api.sociobot.in`. See `/privacy` and `/terms`.
+Online room names and garden state go only to the Pause Garden room server.
+The server removes rooms after 30 inactive days. Demo play sends no player data
+away from the static site. See `/privacy` and `/terms`.
 
 ## Deploy
 
-Run `npm run build:production` followed by
-`node scripts/verify-static-candidate.mjs`, then deploy that `dist/` to the
-existing static site. The checker verifies the exact candidate static hashes,
-production room origin, and SPA fallback configuration. Deploy the Docker image as
-`sf-pause-garden-realtime` with WebSocket ingress and one replica. Mount the
-fleet-created data share at `/data`. The static configuration supplies SPA
-fallback, immutable hashed assets, CSP, and security headers.
+Run `npm run build:production` and `node scripts/verify-static-candidate.mjs`.
+Deploy that `dist/` directory to `sf-pause-garden`.
+
+The checker validates expected built-file checksums and the production room
+address. It also checks the setting that lets valid app links open directly.
+
+For the room service, build the repository Dockerfile. Run one room server
+that accepts live game connections. Mount the fleet-created data share at
+`/data`.
 
 ## License
 
