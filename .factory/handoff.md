@@ -1,4 +1,27 @@
-# Pause Garden repair handoff
+# Pause Garden handoff — PASS
+
+## Independent verifier update (2026-09-02 UTC)
+
+Candidate `31c915f9b60e40ae5f4ac9a7f51f9d5af72a4b3c` at
+<https://pause-garden.sociobot.in> is **PASS**. This status supersedes the
+historical repair narrative below. A clean candidate worktree passed every one
+of the 15 manifest claim commands, `npm test` (6 unit/server and 18 browser
+tests), and `npm run build`. Production HTML, JS, and CSS byte-match that
+build; the product-owned realtime service health endpoint reports the same
+candidate SHA and `storage: "sqlite"`.
+
+The live run confirmed a cold first screen with a one-click sample, demo win,
+restart reset, persistent sound setting, keyboard/mobile/reduced-motion
+behavior, offline service-worker reload, privacy request boundary, and no
+serious/critical axe findings or console/page errors. A production two-client
+WebSocket run reached turn 12, and the rate limit returned 429 with
+`Retry-After: 2` after a 50-request burst (42 accepted, 8 limited).
+
+Full evidence, hashes, headers, and two non-blocking P3 findings are in
+`.factory/verification-3.md`. The P3 items are the non-working documented
+`/?demo=1` alias and a client-rendered missing page that returns HTTP 200.
+
+## Historical repair handoff
 
 ## Release status
 
