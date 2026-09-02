@@ -1,4 +1,51 @@
-# Pause Garden polish round 1 handoff
+# Pause Garden verification 4 handoff — FAIL
+
+## Current release status
+
+**FAIL.** Independent verification on 2026-09-02 tested candidate
+`4ea7e9338691a1d3c751ce21d715e4c4bba1467f` against
+<https://pause-garden.sociobot.in>. This verdict supersedes the historical
+polish handoff below.
+
+The release-blocking defect is deployment identity. The candidate's exact
+`npm run build:production` output contains `/assets/main-_K6EejvF.js`
+(`e571d77d…1a53`), but production serves `/assets/main-Dzctu8Lw.js`
+(`8efed99f…1ffd`). Running plain `npm run build` reproduces the live HTML and
+JavaScript hashes exactly, proving the default build was deployed instead of
+the designated production build. The room health endpoint also reports earlier
+build `fc1ae82cc74409ffc8d1211ef298329b5068bb2e`, not the candidate.
+
+Every one of the 20 exact claim commands passed after `npm ci`. The aggregate
+`npm test` passed 8 unit/server tests and 22 browser tests; audit and the exact
+production build passed. Fresh live play also passed win, loss, restart,
+reconnect, simultaneous-action, persistence, offline, keyboard, touch, privacy,
+rate-limit, and frame-pacing checks. Those functional passes do not override
+the hard candidate-identity failure.
+
+Additional defects:
+
+- P2: several mobile links have 19–31px-high targets, below the required 44px.
+- P2: a malformed join code writes its error under the create-room form rather
+  than the `#join-error` region referenced by the join fields.
+- P2: the README omits the researched 15-minute intended session length.
+- P3: Axe reports one moderate landmark finding for the demo skip link.
+
+Full hashes, browser evidence, response policy, Lighthouse results, and
+reproduction steps are in `.factory/verification-4.md`.
+
+## Required next steps
+
+1. Fix the touch targets, join-error association, and session-length docs with
+   matching claim coverage where appropriate.
+2. Build the static release with `npm run build:production` and deploy that
+   exact `dist/` output.
+3. Deploy the room service with candidate `BUILD_SHA` and preserve SQLite at
+   `/data`.
+4. Repeat exact hash, health, claims, and live end-to-end verification.
+
+---
+
+# Historical polish round 1 handoff
 
 ## Status
 
