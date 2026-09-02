@@ -274,6 +274,11 @@
       "degree": 10
     },
     {
+      "id": "src_main_connectroom",
+      "label": "connectRoom()",
+      "degree": 9
+    },
+    {
       "id": "src_game_applyaction",
       "label": "applyAction()",
       "degree": 9
@@ -281,11 +286,6 @@
     {
       "id": "src_game_creategame",
       "label": "createGame()",
-      "degree": 9
-    },
-    {
-      "id": "server_tsconfig_compileroptions",
-      "label": "compilerOptions",
       "degree": 9
     }
   ],
