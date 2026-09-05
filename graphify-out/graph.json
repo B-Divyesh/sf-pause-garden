@@ -773,11 +773,22 @@
       "source_location": "L95"
     },
     {
+      "id": "scripts_deploy_production_test_position",
+      "label": "position()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "file_type": "code",
+      "norm_label": "position()",
+      "source_file": "scripts/deploy-production.test.mjs",
+      "source_location": "L6"
+    },
+    {
       "id": "scripts_test_run",
       "label": "run()",
       "_callable": true,
       "_origin": "ast",
-      "community": 12,
+      "community": 13,
       "file_type": "code",
       "norm_label": "run()",
       "source_file": "scripts/test.mjs",
@@ -788,7 +799,7 @@
       "label": "bundleFor()",
       "_callable": true,
       "_origin": "ast",
-      "community": 15,
+      "community": 16,
       "file_type": "code",
       "norm_label": "bundlefor()",
       "source_file": "scripts/verify-build-isolation.mjs",
@@ -803,7 +814,7 @@
       "file_type": "code",
       "norm_label": "candidate()",
       "source_file": "scripts/release-identity.test.mjs",
-      "source_location": "L21"
+      "source_location": "L25"
     },
     {
       "id": "scripts_release_identity_test_serve",
@@ -814,7 +825,7 @@
       "file_type": "code",
       "norm_label": "serve()",
       "source_file": "scripts/release-identity.test.mjs",
-      "source_location": "L48"
+      "source_location": "L52"
     },
     {
       "id": "scripts_release_identity_test_sha256",
@@ -825,7 +836,7 @@
       "file_type": "code",
       "norm_label": "sha256()",
       "source_file": "scripts/release-identity.test.mjs",
-      "source_location": "L12"
+      "source_location": "L16"
     },
     {
       "id": "scripts_verify_realtime_candidate_cleanorigin",
@@ -1323,10 +1334,30 @@
       "source_location": "L10"
     },
     {
+      "id": "scripts_deploy_production_test",
+      "label": "deploy-production.test.mjs",
+      "_origin": "ast",
+      "community": 12,
+      "file_type": "code",
+      "norm_label": "deploy-production.test.mjs",
+      "source_file": "scripts/deploy-production.test.mjs",
+      "source_location": "L1"
+    },
+    {
+      "id": "scripts_deploy_production_test_deploymentscript",
+      "label": "deploymentScript",
+      "_origin": "ast",
+      "community": 12,
+      "file_type": "code",
+      "norm_label": "deploymentscript",
+      "source_file": "scripts/deploy-production.test.mjs",
+      "source_location": "L4"
+    },
+    {
       "id": "scripts_test",
       "label": "test.mjs",
       "_origin": "ast",
-      "community": 12,
+      "community": 13,
       "file_type": "code",
       "norm_label": "test.mjs",
       "source_file": "scripts/test.mjs",
@@ -1336,7 +1367,7 @@
       "id": "scripts_test_root",
       "label": "root",
       "_origin": "ast",
-      "community": 12,
+      "community": 13,
       "file_type": "code",
       "norm_label": "root",
       "source_file": "scripts/test.mjs",
@@ -1346,7 +1377,7 @@
       "id": "public_sw",
       "label": "sw.js",
       "_origin": "ast",
-      "community": 13,
+      "community": 14,
       "file_type": "code",
       "norm_label": "sw.js",
       "source_file": "public/sw.js",
@@ -1356,7 +1387,7 @@
       "id": "public_sw_core",
       "label": "CORE",
       "_origin": "ast",
-      "community": 13,
+      "community": 14,
       "file_type": "code",
       "norm_label": "core",
       "source_file": "public/sw.js",
@@ -1366,7 +1397,7 @@
       "id": "scripts_deploy_production",
       "label": "deploy-production.sh",
       "_origin": "ast",
-      "community": 14,
+      "community": 15,
       "file_type": "code",
       "metadata": {
         "language": "bash",
@@ -1380,7 +1411,7 @@
       "id": "scripts_deploy_production_sh__entry",
       "label": "deploy-production.sh script",
       "_origin": "ast",
-      "community": 14,
+      "community": 15,
       "file_type": "code",
       "metadata": {
         "language": "bash",
@@ -1394,7 +1425,7 @@
       "id": "scripts_verify_build_isolation",
       "label": "verify-build-isolation.mjs",
       "_origin": "ast",
-      "community": 15,
+      "community": 16,
       "file_type": "code",
       "norm_label": "verify-build-isolation.mjs",
       "source_file": "scripts/verify-build-isolation.mjs",
@@ -1404,7 +1435,7 @@
       "id": "playwright_config",
       "label": "playwright.config.ts",
       "_origin": "ast",
-      "community": 16,
+      "community": 17,
       "file_type": "code",
       "norm_label": "playwright.config.ts",
       "source_file": "playwright.config.ts",
@@ -1414,7 +1445,7 @@
       "id": "tests_e2e_claims_spec",
       "label": "claims.spec.ts",
       "_origin": "ast",
-      "community": 17,
+      "community": 18,
       "file_type": "code",
       "norm_label": "claims.spec.ts",
       "source_file": "tests/e2e/claims.spec.ts",
@@ -1424,20 +1455,10 @@
       "id": "tests_e2e_quality_spec",
       "label": "quality.spec.ts",
       "_origin": "ast",
-      "community": 18,
+      "community": 19,
       "file_type": "code",
       "norm_label": "quality.spec.ts",
       "source_file": "tests/e2e/quality.spec.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "vite_config",
-      "label": "vite.config.ts",
-      "_origin": "ast",
-      "community": 19,
-      "file_type": "code",
-      "norm_label": "vite.config.ts",
-      "source_file": "vite.config.ts",
       "source_location": "L1"
     },
     {
@@ -1699,6 +1720,16 @@
       "norm_label": "ws",
       "source_file": "package.json",
       "source_location": "L26"
+    },
+    {
+      "id": "vite_config",
+      "label": "vite.config.ts",
+      "_origin": "ast",
+      "community": 20,
+      "file_type": "code",
+      "norm_label": "vite.config.ts",
+      "source_file": "vite.config.ts",
+      "source_location": "L1"
     },
     {
       "id": "tsconfig",
@@ -2118,7 +2149,7 @@
       "file_type": "code",
       "norm_label": "servers",
       "source_file": "scripts/release-identity.test.mjs",
-      "source_location": "L14"
+      "source_location": "L18"
     },
     {
       "id": "scripts_release_identity_test_temporarydirectories",
@@ -2128,7 +2159,7 @@
       "file_type": "code",
       "norm_label": "temporarydirectories",
       "source_file": "scripts/release-identity.test.mjs",
-      "source_location": "L13"
+      "source_location": "L17"
     },
     {
       "id": "scripts_verify_realtime_candidate",
@@ -2433,7 +2464,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/release-identity.test.mjs",
-      "source_location": "L31",
+      "source_location": "L35",
       "weight": 1.0
     },
     {
@@ -4898,6 +4929,28 @@
       "weight": 1.0
     },
     {
+      "source": "scripts_deploy_production_test",
+      "target": "scripts_deploy_production_test_deploymentscript",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/deploy-production.test.mjs",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_deploy_production_test",
+      "target": "scripts_deploy_production_test_position",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/deploy-production.test.mjs",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
       "source": "scripts_prepare_static_routes",
       "target": "scripts_prepare_static_routes_indexurl",
       "relation": "contains",
@@ -4960,7 +5013,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/release-identity.test.mjs",
-      "source_location": "L12",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -4971,7 +5024,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/release-identity.test.mjs",
-      "source_location": "L13",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -4982,7 +5035,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/release-identity.test.mjs",
-      "source_location": "L14",
+      "source_location": "L18",
       "weight": 1.0
     },
     {
@@ -4993,7 +5046,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/release-identity.test.mjs",
-      "source_location": "L21",
+      "source_location": "L25",
       "weight": 1.0
     },
     {
@@ -5004,7 +5057,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/release-identity.test.mjs",
-      "source_location": "L48",
+      "source_location": "L52",
       "weight": 1.0
     },
     {
@@ -6578,5 +6631,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "40dbd7eec14996c05818ebbf976b96b25ea1bbe0"
+  "built_at_commit": "aca80d9c9d42ebf2a2ca9ff5421ba97b8b22384f"
 }
