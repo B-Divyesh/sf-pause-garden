@@ -1,77 +1,58 @@
-# Pause Garden repair 7 handoff
+# Pause Garden verification 9 handoff
 
-## Release status
+## Result
 
-**Released through the paired gate.** This repair reproduces and blocks the
-mixed static/realtime release found in Verification 8. The production release
-command builds, deploys, and proves both components from the same pushed `HEAD`
-while keeping the existing room-service `/data` storage identity.
+**PASS — zero findings and zero untested claims.**
 
-## What changed
+Independent QA reviewed implementation candidate
+`18f0902ee3dfa3292f867287f43aca482d2117e7` against
+<https://pause-garden.sociobot.in>. The later repository/static marker
+`aca80d9c9d42ebf2a2ca9ff5421ba97b8b22384f` changes only Graphify analysis
+files. Live JS and CSS match the implementation candidate byte for byte, and
+realtime health reports the implementation SHA with SQLite storage.
 
-- Reproduced the live P0 before changing code: static
-  `c24c20d9124569b8499814f45c95a6a5a306dc10` was live while room health
-  reported `01e3bffd7b44b5d6e808c62dc2b29449db319cb6`. The raw commands and
-  values are recorded in `.factory/repair-7-reproduction.md`.
-- Added a deterministic release-contract fixture using those exact two IDs. It
-  requires `verifyReleaseIdentity` to reject a byte-matching static candidate
-  when room health reports the stale service build.
-- Added a deployment-order contract. It requires the production release script
-  to build the realtime image with `BUILD_SHA`, preserve `/data` storage, wait
-  for the candidate health response, and only then publish static files.
-- Browser tests now refuse an existing web server. This prevents a local
-  production preview from being silently reused in place of `test-dist` and
-  its localhost room server; the production-artifact regression checks it.
+The complete report is `.factory/verification-9.md`.
 
-## Verification
+## What was verified
 
-- Clean install: `npm ci` installed 66 packages; `npm audit --audit-level=high`
-  reported zero vulnerabilities.
-- `npm test` passed: 8 game/server unit tests, 5 release contracts, 29
-  Playwright desktop/mobile tests, and production-artifact isolation.
-- Every one of the 23 exact commands in `.factory/claims.json` passed in a
-  fresh, isolated test-server run. This includes deterministic end screens and
-  replay, two-browser remote play/reconnect, keyboard/touch, offline reload,
-  privacy boundary, SQLite persistence/expiry, and build identity.
-- `npm run build` passed both TypeScript checks. The artifact is 332 kB total;
-  JavaScript is 30,481 bytes (10.46 kB gzip) and CSS is 13,044 bytes (3.90 kB
-  gzip).
-- Local `verify-url.sh` loaded the production artifact in 577 ms with no page
-  or console errors; it found one title, `lang="en"`, one h1, a main landmark,
-  no missing image alt text, and no unnamed buttons. The pinned Axe browser
-  integration in the 29-test suite reported zero violations.
+- A detached clean checkout passed the locked install, zero-vulnerability
+  audit, all 23 standalone claim commands, `npm test`, production build, and
+  static-candidate check.
+- Fresh phone and desktop first screens state the job, audience, and first
+  action before scrolling and show the garden preview.
+- The isolated sample preserves real data, resets, keeps its banner, and
+  reaches **Garden restored** by keyboard and touch.
+- Two independent live clients reconnected after turn 2, reached **Chapter
+  complete** at turn 12, and restarted at turn 1. Separate live rooms remained
+  isolated.
+- Invalid and boundary inputs, pause focus, sound persistence, sleeping-player
+  handoff, offline reload/update, reduced motion, 200% text, legal routes,
+  designed 404, headers, caching, and privacy requests passed.
+- Live response policy returned 42 × 200 and 54 × 429 with `Retry-After: 2`.
+- Factory URL verification passed. Full Axe scans found zero violations.
+- Lighthouse mobile scored 100 performance, 100 accessibility, 100 best
+  practices, and 100 SEO. LCP was 1.05 s and CLS was 0.
 
-## Deployment and live proof
-
-The release was run from a clean, pushed commit:
+## How to repeat
 
 ```sh
-npm run deploy:production
+npm ci --include=dev
+npm audit --audit-level=high
+npm test
+npm run build
+node scripts/verify-static-candidate.mjs
+npm run verify:live-behavior
 ```
 
-The command deployed `sf-pause-garden-realtime` first and preserved the
-existing mount `/data` and storage name `sf-pause-garden-realtime-data`. Before
-static publication, realtime health returned `ok: true`, `storage: "sqlite"`,
-and the current full candidate SHA. The independent post-deploy
-`npm run verify:live-release` also returned `ok: true`: live manifest source,
-static asset checksums, service worker, and room health all matched the same
-full current candidate SHA.
+Run every exact command in `.factory/claims.json` separately. Browser and
+performance evidence from this run is under `/work/.evidence/`.
 
-`npm run verify:live-behavior` then created a two-player room, reconnected one
-browser after turn 2, completed all 12 turns, and observed **Chapter complete**
-on the end screen. Its 96-request response-policy probe returned 42 successful
-responses and 54 rate-limited responses, each with `Retry-After: 2`.
+`npm run verify:live-release` from `18f0902` reports the later static marker
+`aca80d9` and exits nonzero. Normalize only that embedded Graphify SHA and both
+`index.html` and `sw.js` are byte-identical; JS/CSS match without normalization.
+This is the work order's stated report-only exception, not a product finding.
 
-The final live URL smoke check loaded in 621 ms with no page or console errors,
-one title, `lang="en"`, one h1, a main landmark, no missing alt text, and no
-unnamed buttons. Live Lighthouse reported performance 99, accessibility 100,
-FCP 0.9 s, LCP 1.1 s, and CLS 0.
+## Product changes and remaining work
 
-The deploy-time JSON evidence is written locally to the ignored
-`release-evidence/` directory so it never becomes a stale candidate artifact.
-
-## Known gaps and next steps
-
-None. Do not deploy the static directory independently: use
-`npm run deploy:production` so the realtime candidate gate remains in front of
-static publication.
+No product code was modified. Only this handoff and the verification report
+were added to the repository. No known gaps or next steps remain.
