@@ -1,37 +1,44 @@
-# Pause Garden review 3 handoff
+# Pause Garden review 4 handoff
 
 ## Result
 
-**PASS — zero findings and zero untested claims.**
+**FAIL — 2 findings and 0 untested claims.**
 
-Fresh strict review 3 reviewed implementation candidate
+Strict review 4 checked implementation candidate
 `18f0902ee3dfa3292f867287f43aca482d2117e7` against
-<https://pause-garden.sociobot.in>. Documentation is at
-`aacaa334b053b581b373e31ca66e7d01a5b66ccf`. The later repository/static
-marker `aca80d9c9d42ebf2a2ca9ff5421ba97b8b22384f` changes only Graphify
-analysis files. Live JS and CSS match the implementation candidate byte for
-byte, and realtime health reports the implementation SHA with SQLite storage.
+<https://pause-garden.sociobot.in>. The documentation baseline was
+`465335287411c7f2c5cdadd55535455e70fe5e17`; the work-order repository baseline
+was the later Graphify marker `5f20887cb18c2c1860d17a786c975fe1573c9024`.
 
-The complete report is `.factory/review-3.md`.
+The complete report is `.factory/review-4.md`.
 
-## What was verified
+## Findings to fix
 
-- A new detached clean checkout passed the locked install, zero-vulnerability
-  audit, all 23 standalone claim commands, `npm test`, production build, and
-  static-candidate check.
-- Fresh phone and desktop first screens state the job, audience, and first
-  action before scrolling and show the garden preview.
-- The isolated sample preserves real data, resets, keeps its banner, and
-  reaches **Garden restored** by keyboard and touch.
-- Two independent live clients reconnected after turn 2 and reached **Chapter
-  complete** at turn 12. Separate live rooms remained isolated.
-- Invalid and boundary inputs, pause focus, sound persistence, sleeping-player
-  handoff, offline reload/update, reduced motion, 200% text, legal routes,
-  designed 404, headers, caching, and privacy requests passed.
-- Live response policy returned 44 × 200 and 52 × 429 with `Retry-After: 2`.
-- Factory URL verification passed. Full Axe scans found zero violations.
-- Lighthouse mobile scored 98 performance, 100 accessibility, 100 best
-  practices, and 100 SEO. LCP was 2.1 s, TBT 0 ms, and CLS was 0.
+1. At 390 × 844, the phone first viewport shows no game-board tile. Move a
+   meaningful board preview above the fold while keeping the job, audience,
+   sample action, and next-step text visible.
+2. Change the missing-page h1 from **This path does not reach the garden** to
+   the plain heading **Page not found**.
+
+No product code was modified during this review.
+
+## What passed
+
+- All 23 exact claim commands, the aggregate `npm test`, the production build,
+  the static-candidate check, realtime identity, and live behavior passed.
+- Keyboard and touch sample runs reached **Garden restored**. Two independent
+  live clients reconnected, reached the same turn-12 **Chapter complete**
+  screen, and restarted at turn 1.
+- Demo reset, persistent sample label, storage isolation, settings, pause
+  focus, invalid inputs, four-player boundary, tenant isolation, controlled
+  SQLite restart persistence, health, and 429/`Retry-After` behavior passed.
+- Axe found zero violations. Offline reload, reduced motion, 200% text,
+  product-owned links, legal routes, response headers, and deliberate HTTP 404
+  behavior passed.
+- Lighthouse mobile: 97 performance, 100 accessibility, 100 best practices,
+  and 100 SEO. LCP was 2.35 s, TBT 0 ms, and CLS 0.
+- Live JS/CSS exactly match implementation `18f0902`; the static shell differs
+  only by the explicitly allowed later Graphify/report build marker.
 
 ## How to repeat
 
@@ -41,18 +48,21 @@ npm audit --audit-level=high
 npm test
 npm run build
 node scripts/verify-static-candidate.mjs
+npm run verify:live-realtime
 npm run verify:live-behavior
 ```
 
-Run every exact command in `.factory/claims.json` separately. Browser and
-performance evidence from this run is under `/work/.evidence/`.
+Run every exact command in `.factory/claims.json` separately. Evidence from
+this review is under `/work/.evidence/pause-garden-review4/` and the top-level
+`/work/.evidence/pause-garden-review4-*` files.
 
-The live static manifest carries `aca80d9` while realtime reports `18f0902`.
-The JS/CSS hashes exactly match `18f0902`; this is the work order's stated
-Graphify-only exception, not a product finding.
+`npm run verify:live-release` exits 1 because it compares the later static
+Graphify marker literally with `18f0902`. Exact JS/CSS comparison and shell
+normalization prove there is no later product image.
 
-## Product changes and remaining work
+## Next step
 
-No product code was modified. Only this handoff and the review report were
-changed. The three pre-existing uncommitted Graphify files remain untouched.
-No known gaps or next steps remain.
+Make only the two reported UI/copy corrections, deploy the new paired static
+and realtime release as required by the repository release contract, then run
+a fresh phone and route-copy review. The three pre-existing uncommitted
+Graphify files remain untouched.
