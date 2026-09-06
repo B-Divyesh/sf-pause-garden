@@ -12,6 +12,30 @@ The two strict-review findings are fixed and the repaired release is live.
 The later documentation commit does not change the deployed product. The three
 pre-existing uncommitted Graphify files remain untouched and excluded.
 
+## Independent verification 10
+
+Verification 10 passed with zero findings and zero untested claims.
+
+- Implementation reviewed: `e648ac2fcfedae0b2eedd27eb4c59f110c9ebabf`
+- Documentation handoff: `39799318fd0daec3989a5b7d802c76ed388e4c2c`
+- Later Graphify baseline: `38c51496ebc5fb2e6287ac9b09858fd4c19bbf79`
+- Report: `.factory/verification-10.md`
+
+An isolated clean checkout passed `npm ci --include=dev`, `npm audit
+--audit-level=high`, every one of the 23 exact claim commands, `npm test`,
+and `npm run build`. Fresh live desktop and phone checks showed the job,
+audience, sample action, and a complete phone board tile before scrolling.
+The sample completed, reset, and preserved a real-data sentinel while removing
+only demo state. A two-client live run refreshed one player, reached the
+turn-12 end screen in both browsers, and received 52 valid HTTP 429 responses
+with `Retry-After: 2` in a 96-request allowance probe. Axe found zero
+violations and mobile Lighthouse scored 100/100/100/100.
+
+The live JS/CSS assets and realtime health match the implementation candidate.
+The static HTML/service-worker marker records the later Graphify-only commit;
+after replacing only that marker, each file is byte-identical to the candidate.
+This is an allowed report/Graphify difference, not a product-image mismatch.
+
 ## What changed
 
 - Tightened the phone hero spacing so the first complete sample bed is visible
