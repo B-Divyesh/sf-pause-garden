@@ -1,5 +1,31 @@
 # Pause Garden repair 8 handoff
 
+## Strict review 5
+
+Strict review 5 passed with zero findings and zero untested claims. It reviewed
+implementation `e648ac2fcfedae0b2eedd27eb4c59f110c9ebabf` against the live
+site and recorded documentation baseline `93af6cb`.
+
+- Report: `.factory/review-5.md`
+- Clean verification: `npm ci --include=dev`, `npm audit --audit-level=high`,
+  all 23 declared claims by their exact commands, `npm test`, `npm run build`,
+  and `node scripts/verify-static-candidate.mjs` passed.
+- Live verification: fresh desktop and phone first screens showed the job,
+  audience, sample action, and board; sample play won, reset, and discarded
+  only demo state; two independent online clients reconnected and completed a
+  12-turn chapter; health confirmed SQLite and the implementation SHA; a
+  96-request allowance probe returned 54 HTTP 429 responses with
+  `Retry-After: 2`.
+- Accessibility and route checks: factory URL verification and fresh Axe scans
+  passed on all main routes and the deliberate HTTP 404. The 404 h1 is now
+  `Page not found`; phone’s first complete tile is y=763.52–834.34.
+- Release identity: the live JS/CSS hashes exactly match the implementation.
+  Its HTML/service worker markers name later Graphify-only commit `38c5149`;
+  normalizing only the build marker makes them byte-identical to the candidate.
+
+No product defect or untested claim remains. Existing uncommitted Graphify
+files were preserved. Review evidence is under `/work/.evidence/pause-garden-review5/`.
+
 ## Result
 
 The two strict-review findings are fixed and the repaired release is live.
