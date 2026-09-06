@@ -305,13 +305,13 @@
       "degree": 24
     },
     {
-      "id": "src_main_render",
-      "label": "render()",
+      "id": "package_scripts",
+      "label": "scripts",
       "degree": 18
     },
     {
-      "id": "package_scripts",
-      "label": "scripts",
+      "id": "src_main_render",
+      "label": "render()",
       "degree": 18
     },
     {
@@ -345,8 +345,8 @@
       "degree": 9
     },
     {
-      "id": "src_main_connectroom",
-      "label": "connectRoom()",
+      "id": "server_tsconfig_compileroptions",
+      "label": "compilerOptions",
       "degree": 9
     }
   ],
