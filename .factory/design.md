@@ -99,6 +99,8 @@ separate session-storage sandbox.
 ## Responsive intent
 
 At 390 px, the hero image becomes a shallow stage behind the first screen and
-the copy plate stays opaque. The game board remains a 4 × 4 grid. Secondary
-explanations move below play, but weather, goal, active player, and actions stay
-visible without horizontal scrolling.
+the copy plate stays opaque. The first complete sample bed appears within an
+844 px-tall first viewport after the job, audience, action, and three facts.
+The game board remains a 4 × 4 grid. Secondary explanations move below play,
+but weather, goal, active player, and actions stay visible without horizontal
+scrolling.

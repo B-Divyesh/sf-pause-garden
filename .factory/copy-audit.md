@@ -1,6 +1,6 @@
 # Landing page copy audit
 
-Audited September 2, 2026. Every first-screen and landing-page string is below
+Audited September 6, 2026. Every first-screen and landing-page string is below
 the 22-word limit. No banned marketing word is present.
 
 | Copy | Words | Result |
@@ -57,6 +57,18 @@ the 22-word limit. No banned marketing word is present.
 | Terms | 1 | Pass |
 | Built by Param Factory | 4 | Pass |
 
+## Missing-page copy
+
+| Copy | Words | Result |
+| --- | ---: | --- |
+| Page not found | 3 | Pass |
+| The requested page was not found. | 6 | Pass |
+| Return home or open the sample game. | 7 | Pass |
+| The page may have moved. | 5 | Pass |
+| Return home or open the sample garden. | 7 | Pass |
+| Return home | 2 | Pass |
+| Open sample garden | 3 | Pass |
+
 ## Terminology
 
 | Concept | Word used |
@@ -69,3 +81,4 @@ the 22-word limit. No banned marketing word is present.
 | Board square | bed |
 | Deterministic run identifier | seed |
 | Unavailable paid option | Host Edition |
+| Missing URL state | Page not found |
