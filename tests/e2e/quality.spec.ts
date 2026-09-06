@@ -48,6 +48,7 @@ test('routes set unique titles, metadata, focus, and HTTP status', async ({ page
   const missing = await page.goto('/missing-page');
   expect(missing?.status()).toBe(404);
   await expect(page).toHaveTitle('Page not found — Pause Garden');
+  await expect(page.getByRole('heading', { level: 1, name: 'Page not found', exact: true })).toBeVisible();
 
   await page.goto('/');
   await page.getByRole('link', { name: 'Demo', exact: true }).click();
@@ -91,7 +92,17 @@ test('every local page link resolves and legal links remain visible', async ({ p
   await expect(page.getByRole('link', { name: 'Terms', exact: true })).toBeVisible();
 });
 
-test('@mobile game fits a 390px viewport', async ({ page }) => {
+test('@mobile the first phone viewport shows the job, sample action, facts, and a full board tile', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+
+  for (const selector of ['h1', '.lede', '.hero-actions', '.facts', '.preview-bed:first-child']) {
+    const box = await page.locator(selector).boundingBox();
+    expect(box, `${selector} is rendered`).not.toBeNull();
+    expect(box!.y, `${selector} starts inside the first viewport`).toBeGreaterThanOrEqual(0);
+    expect(box!.y + box!.height, `${selector} ends inside the first viewport`).toBeLessThanOrEqual(844);
+  }
+
   await page.goto('/demo');
   const width = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, client: document.documentElement.clientWidth }));
   expect(width.scroll).toBeLessThanOrEqual(width.client);

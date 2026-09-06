@@ -99,7 +99,7 @@ function updateMetadata(path: string): void {
     '/play': 'Create or join a private Pause Garden room for 2–4 remote friends.',
     '/privacy': 'Read what Pause Garden stores for private rooms and when room data is removed.',
     '/terms': 'Read the play and Host Edition availability terms for Pause Garden.',
-    '/404': 'This page does not reach the garden. Return home or open the sample game.',
+    '/404': 'The requested page was not found. Return home or open the sample game.',
   };
   const description = descriptions[path] || descriptions['/404'];
   document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute('content', description);
@@ -302,7 +302,7 @@ function legalPage(kind: 'privacy' | 'terms'): string {
 }
 
 function notFound(): string {
-  return `${header('/404')}<main id="main" class="shell not-found"><p class="eyebrow">404</p><h1>This path does not reach the garden</h1><p class="lede">The page may have moved. Return home or open the sample garden.</p><div class="hero-actions"><a class="button" href="/" data-link>Return home</a><a class="button secondary" href="/demo" data-link>Open sample garden</a></div></main>${footer()}`;
+  return `${header('/404')}<main id="main" class="shell not-found"><p class="eyebrow">404</p><h1>Page not found</h1><p class="lede">The page may have moved. Return home or open the sample garden.</p><div class="hero-actions"><a class="button" href="/" data-link>Return home</a><a class="button secondary" href="/demo" data-link>Open sample garden</a></div></main>${footer()}`;
 }
 
 function bindCommon(): void {

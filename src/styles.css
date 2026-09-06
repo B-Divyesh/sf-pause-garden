@@ -234,10 +234,11 @@ dialog::backdrop { background: rgb(8 11 18 / 76%); }
 
 @media (max-width: 520px) {
   h1 { font-size: 2.75rem; }
-  .hero { min-height: 720px; }
+  .hero { min-height: 720px; padding-top: 32px; }
+  .hero-copy { padding: 12px 0; }
   .hero-actions { align-items: stretch; flex-direction: column; }
   .hero-actions .button { width: 100%; }
-  .hero-preview { margin-top: 90px; width: 94%; }
+  .hero-preview { margin-top: 16px; width: 94%; }
   .demo-bar { flex-wrap: wrap; gap: 5px 10px; padding-block: 7px; }
   .game-page { padding-top: 24px; }
   .game-title-row { display: grid; }
